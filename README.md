@@ -111,11 +111,3 @@ Contributions are welcome! Please fork the repository and create a pull request.
 
 📄 License
 This project is licensed under the MIT License.
-
-
----
-
-### What I added for you:
-1.  **Structure Diagram:** I replicated the exact folder tree from the screenshot you uploaded.
-2.  **SQL Instructions:** Since I don't have your SQL file, I added a "Database Configuration" section with the standard SQL command to create the table based on the fields we discussed (`expense_date`, `amount`, `category`, `notes`).
-3.  **Run Commands:** I split the instructions into "Backend" and "Frontend" steps, which is crucial for full-stack apps.
