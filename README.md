@@ -1,113 +1,263 @@
-# Expense Tracking System
+<div align="center">
 
-A full-stack web application designed to track personal daily expenses, categorize spending, and visualize monthly financial data. This project uses **Streamlit** for the frontend user interface and **FastAPI** for the backend REST API, backed by a **MySQL** database.
+<pre>
+███████╗██╗  ██╗██████╗ ███████╗███╗   ██╗███████╗███████╗
+██╔════╝╚██╗██╔╝██╔══██╗██╔════╝████╗  ██║██╔════╝██╔════╝
+█████╗   ╚███╔╝ ██████╔╝█████╗  ██╔██╗ ██║███████╗█████╗  
+██╔══╝   ██╔██╗ ██╔═══╝ ██╔══╝  ██║╚██╗██║╚════██║██╔══╝  
+███████╗██╔╝ ██╗██║     ███████╗██║ ╚████║███████║███████╗
+╚══════╝╚═╝  ╚═╝╚═╝     ╚══════╝╚═╝  ╚═══╝╚══════╝╚══════╝
+████████╗██████╗  █████╗  ██████╗██╗  ██╗███████╗██████╗  
+╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗ 
+   ██║   ██████╔╝███████║██║     █████╔╝ █████╗  ██████╔╝ 
+   ██║   ██╔══██╗██╔══██║██║     ██╔═██╗ ██╔══╝  ██╔══██╗ 
+   ██║   ██║  ██║██║  ██║╚██████╗██║  ██╗███████╗██║  ██║ 
+   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ 
+</pre>
+
+### `Full-Stack Personal Finance Management System`
+
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Frontend-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](./LICENSE)
+
+<br/>
+
+> *Know where every rupee goes.*  
+> Log expenses · Visualize spending · Stay in control — all from your browser.
+
+<br/>
+
+---
+
+</div>
+
+<br/>
+
+## 💡 What is Expense Tracker?
+
+A **full-stack web application** built to take the friction out of personal finance tracking. Log your daily expenses by category, filter by date, and get visual insights into your spending habits — all powered by a clean **FastAPI** backend, a **Streamlit** frontend, and a reliable **MySQL** database.
+
+No spreadsheets. No guesswork. Just clarity.
+
+<br/>
 
 ## 🚀 Features
 
-* **Add & Update Expenses:** Easy-to-use form to log daily expenses with categories (Rent, Food, Shopping, etc.) and notes.
-* **Date-wise Filtering:** View expenses for specific dates.
-* **Analytics Dashboard:** Visual insights into spending habits (Tabulated summaries and charts).
-* **Robust Backend:** FastAPI server handling database operations efficiently.
-* **Logging:** Comprehensive server-side logging for debugging and tracking errors.
+<table>
+<tr>
+<td width="50%">
+
+### 💸 Add & Update Expenses
+An easy-to-use form to log daily expenses with categories — Rent, Food, Shopping, Transport, and more — plus custom notes for context.
+
+</td>
+<td width="50%">
+
+### 📅 Date-wise Filtering
+Retrieve and review expenses for any specific date. Drill down into exactly what you spent and when.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 📊 Analytics Dashboard
+Visual spending insights with tabulated summaries and charts. Understand patterns, identify overspending, and take action.
+
+</td>
+<td width="50%">
+
+### ⚡ Robust FastAPI Backend
+A high-performance REST API server that handles all database operations with speed, validation, and clean error responses.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🪵 Server-Side Logging
+Comprehensive logging for every operation — errors, requests, and database events — making debugging effortless.
+
+</td>
+<td width="50%">
+
+### 🧪 Test Coverage
+A dedicated `tests/` module to validate core backend logic and keep the system reliable as it grows.
+
+</td>
+</tr>
+</table>
+
+<br/>
 
 ## 🛠️ Tech Stack
 
-* **Frontend:** [Streamlit](https://streamlit.io/) (Python)
-* **Backend:** [FastAPI](https://fastapi.tiangolo.com/) (Python)
-* **Database:** MySQL
-* **Language:** Python 3.10+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    EXPENSE TRACKER STACK                         │
+├───────────────────────┬──────────────────────────────────────────┤
+│  Frontend / UI        │  Streamlit (Python)                      │
+├───────────────────────┼──────────────────────────────────────────┤
+│  Backend / API        │  FastAPI + Uvicorn                       │
+├───────────────────────┼──────────────────────────────────────────┤
+│  Database             │  MySQL                                   │
+├───────────────────────┼──────────────────────────────────────────┤
+│  Language             │  Python 3.10+                            │
+├───────────────────────┼──────────────────────────────────────────┤
+│  Logging              │  Python logging module                   │
+├───────────────────────┼──────────────────────────────────────────┤
+│  Testing              │  pytest (tests/ module)                  │
+└───────────────────────┴──────────────────────────────────────────┘
+```
+
+<br/>
 
 ## 📂 Project Structure
 
-```text
-project-expense-tracking/
+```
+Expense-Tracking-System/
+│
 ├── backend/
-│   ├── db_helper.py         # Database connection and SQL queries
-│   ├── logging_setup.py     # Configuration for system logs
-│   ├── server.py            # Main FastAPI server entry point
-│   └── server.log           # Runtime logs
+│   ├── server.py            # 🚀 FastAPI server entry point
+│   ├── db_helper.py         # 🗄️  Database connection & SQL queries
+│   ├── logging_setup.py     # 🪵  Logging configuration
+│   └── server.log           # 📋  Runtime logs (auto-generated)
+│
 ├── frontend/
-│   ├── add_update_ui.py     # UI component for adding/updating expenses
-│   ├── analytics_ui.py      # UI component for charts and summary
-│   └── app.py               # Main Streamlit application entry point
-├── tests/                   # Unit tests
-├── requirements.txt         # Project dependencies
-└── README.md                # Project documentation
-⚙️ Setup & Installation
-1. Prerequisites
-Python installed (version 3.10 or higher recommended).
+│   ├── app.py               # 🖥️  Main Streamlit application
+│   ├── add_update_ui.py     # ➕  Add/update expense UI component
+│   └── analytics_ui.py      # 📊  Charts & summary UI component
+│
+├── tests/                   # 🧪 Unit tests
+│
+├── requirements.txt         # 📦 Python dependencies
+├── .gitignore
+└── README.md
+```
 
-MySQL Server installed and running.
+<br/>
 
-2. Clone the Repository
-Bash
+## ⚙️ Setup & Installation
 
-git clone [https://github.com/your-username/project-expense-tracking.git](https://github.com/your-username/project-expense-tracking.git)
-cd project-expense-tracking
-3. Install Dependencies
-Install the required Python libraries using pip:
+### Prerequisites
 
-Bash
+- **Python 3.10+** installed
+- **MySQL Server** installed and running locally
 
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Shub-ways/Expense-Tracking-System.git
+cd Expense-Tracking-System
+```
+
+### 2. Install Dependencies
+
+```bash
 pip install -r requirements.txt
-4. Database Configuration
-Open your MySQL client (Workbench or Command Line).
+```
 
-Create a new database named expenses_db (or whatever name you used in db_helper.py).
+### 3. Configure the Database
 
-Create the expenses table:
+Open your MySQL client (Workbench or CLI) and run:
 
-SQL
+```sql
+CREATE DATABASE expenses_db;
+
+USE expenses_db;
 
 CREATE TABLE expenses (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    expense_date DATE NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    category VARCHAR(50) NOT NULL,
-    notes TEXT
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    expense_date  DATE           NOT NULL,
+    amount        DECIMAL(10, 2) NOT NULL,
+    category      VARCHAR(50)    NOT NULL,
+    notes         TEXT
 );
-Note: Ensure your database credentials (host, user, password) in backend/db_helper.py are correct.
+```
 
-🏃‍♂️ How to Run
-You need to run the Backend and Frontend in two separate terminals.
+> ⚠️ Then update your credentials (host, user, password) inside `backend/db_helper.py`.
 
-Step 1: Start the Backend Server
-Open a terminal at the project root and run:
+<br/>
 
-Bash
+## 🏃 How to Run
 
+This app requires **two terminals** running simultaneously.
+
+**Terminal 1 — Start the Backend**
+
+```bash
 cd backend
 uvicorn server:app --reload
-The server will start at http://localhost:8000
+```
 
-Step 2: Start the Frontend Application
-Open a new terminal at the project root and run:
+> Backend live at → `http://localhost:8000`
 
-Bash
+**Terminal 2 — Start the Frontend**
 
+```bash
 streamlit run frontend/app.py
-The application will open in your browser at http://localhost:8501
+```
 
-🔌 API Endpoints
-The backend exposes the following RESTful endpoints:
+> App opens in browser at → `http://localhost:8501`
 
-GET /expenses/{date} - Retrieve all expenses for a specific date.
+<br/>
 
-POST /expenses/{date} - Add or update expenses for a specific date.
+## 🔌 API Reference
 
-GET /analytics - Get summary data for a date range.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/expenses/{date}` | Fetch all expenses for a specific date |
+| `POST` | `/expenses/{date}` | Add or update expenses for a date |
+| `GET` | `/analytics` | Get spending summary for a date range |
+| `DELETE` | `/expenses/{id}` | Delete a specific expense record |
 
-DELETE /expenses/{id} - Delete a specific expense record.
+> 📖 Interactive API docs auto-generated at `http://localhost:8000/docs` (Swagger UI)
 
-📝 Future Improvements
-Add authentication (Login/Signup).
+<br/>
 
-Export reports to CSV/PDF.
+## 🗺️ Roadmap
 
-Monthly budget limit alerts.
+- [ ] User authentication (Login / Signup)
+- [ ] Export reports to CSV / PDF
+- [ ] Monthly budget limit alerts
+- [ ] Recurring expense support
+- [ ] Mobile-responsive UI
 
-🤝 Contributing
-Contributions are welcome! Please fork the repository and create a pull request.
+<br/>
 
-📄 License
-This project is licensed under the MIT License.
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+1. Fork the project
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
+4. Push to the branch: `git push origin feature/AmazingFeature`
+5. Open a Pull Request
+
+<br/>
+
+## 📄 License
+
+Distributed under the **MIT License**. See [`LICENSE`](./LICENSE) for more information.
+
+<br/>
+
+## 👨‍💻 Author
+
+<div align="center">
+
+**Shubham Kumar**
+
+[![GitHub](https://img.shields.io/badge/GitHub-Shub--ways-181717?style=for-the-badge&logo=github)](https://github.com/Shub-ways)
+
+*Built with ❤️ for smarter personal finance*
+
+---
+
+⭐ **Found it useful? Drop a star!** ⭐
+
+</div>
