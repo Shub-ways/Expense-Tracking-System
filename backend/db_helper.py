@@ -1,127 +1,136 @@
 import os
+import asyncio
 from dotenv import load_dotenv
-import mysql.connector
-from mysql.connector.pooling import MySQLConnectionPool
-from contextlib import contextmanager
+import aiomysql
+from aiomysql.cursors import DictCursor
+from contextlib import asynccontextmanager
 from logging_setup import setup_logger
 
 logger = setup_logger('db_helper')
 load_dotenv()
 
 # ---------------------------------------------------------------------------
-# Connection Pool — one pool shared across all requests (max 5 connections).
+# Connection Pool — one pool shared across all requests.
 # This avoids the overhead of creating a new TCP connection per query.
 # ---------------------------------------------------------------------------
 _db_config = {
     "host": os.getenv("DB_HOST", "localhost"),
     "user": os.getenv("DB_USER", "root"),
     "password": os.getenv("DB_PASSWORD"),
-    "database": os.getenv("DB_NAME", "expense_manager"),
+    "db": os.getenv("DB_NAME", "expense_manager"),
 }
 
-# Lazy singleton — pool is created on first DB access, not at import time.
-# This allows tests to import db_helper without a live MySQL instance.
+# Lazy thread-safe singleton pool
 _pool = None
+_pool_lock = asyncio.Lock()
 
 
-def _get_pool():
+async def get_pool():
     """Return the shared connection pool, creating it on first call."""
     global _pool
     if _pool is None:
-        _pool = MySQLConnectionPool(pool_name="expense_pool", pool_size=5, **_db_config)
+        async with _pool_lock:
+            if _pool is None:
+                _pool = await aiomysql.create_pool(
+                    host=_db_config["host"],
+                    user=_db_config["user"],
+                    password=_db_config["password"],
+                    db=_db_config["db"],
+                    minsize=1,
+                    maxsize=5,
+                    autocommit=False
+                )
     return _pool
 
 
-@contextmanager
-def get_db_cursor(commit=False):
-    """Context manager that borrows a connection from the pool, yields a
+@asynccontextmanager
+async def get_db_cursor(commit=False):
+    """Async context manager that borrows a connection from the pool, yields a
     dict cursor, and returns the connection to the pool on exit."""
-    connection = _get_pool().get_connection()
-    cursor = connection.cursor(dictionary=True)
-    try:
-        yield cursor
-        if commit:
-            connection.commit()
-    except Exception:
-        connection.rollback()
-        raise
-    finally:
-        cursor.close()
-        connection.close()  # returns connection to pool
+    pool = await get_pool()
+    async with pool.acquire() as connection:
+        async with connection.cursor(DictCursor) as cursor:
+            try:
+                yield cursor
+                if commit:
+                    await connection.commit()
+            except Exception:
+                await connection.rollback()
+                raise
 
 
 # ---------------------------------------------------------------------------
 # User operations
 # ---------------------------------------------------------------------------
 
-def create_user(username, password_hash):
+async def create_user(username, password_hash):
     """Insert a new user into the users table. Returns True on success, False otherwise."""
     logger.info(f"create_user called for username: {username}")
     try:
-        with get_db_cursor(commit=True) as cursor:
-            cursor.execute(
+        async with get_db_cursor(commit=True) as cursor:
+            await cursor.execute(
                 "INSERT INTO users (username, password_hash) VALUES (%s, %s)",
                 (username, password_hash),
             )
         return True
-    except mysql.connector.Error as e:
+    except Exception as e:
         logger.error(f"Error creating user {username}: {e}")
         return False
 
 
-def fetch_user_by_username(username):
+async def fetch_user_by_username(username):
     """Retrieve user details by username. Returns None if not found."""
     logger.info(f"fetch_user_by_username called for username: {username}")
-    with get_db_cursor() as cursor:
-        cursor.execute(
+    async with get_db_cursor() as cursor:
+        await cursor.execute(
             "SELECT id, username, password_hash FROM users WHERE username = %s",
             (username,),
         )
-        return cursor.fetchone()
+        return await cursor.fetchone()
 
 
 # ---------------------------------------------------------------------------
 # Query functions (scoped by user_id)
 # ---------------------------------------------------------------------------
 
-def fetch_expenses_for_date(user_id, expense_date):
+async def fetch_expenses_for_date(user_id, expense_date):
     logger.info(f"fetch_expenses_for_date called for user {user_id} on {expense_date}")
-    with get_db_cursor() as cursor:
-        cursor.execute(
+    async with get_db_cursor() as cursor:
+        await cursor.execute(
             "SELECT * FROM expenses WHERE user_id = %s AND expense_date = %s",
             (user_id, expense_date),
         )
-        return cursor.fetchall()
+        return await cursor.fetchall()
 
 
-def delete_expenses_for_date(user_id, expense_date):
+async def delete_expenses_for_date(user_id, expense_date):
     logger.info(f"delete_expenses_for_date called for user {user_id} on {expense_date}")
-    with get_db_cursor(commit=True) as cursor:
-        cursor.execute(
+    async with get_db_cursor(commit=True) as cursor:
+        await cursor.execute(
             "DELETE FROM expenses WHERE user_id = %s AND expense_date = %s",
             (user_id, expense_date),
         )
 
 
-def insert_expense(user_id, expense_date, amount, category, notes):
+async def insert_expense(user_id, expense_date, amount, category, notes):
     logger.info(
         f"insert_expense called for user {user_id} with date: {expense_date}, "
         f"amount: {amount}, category: {category}, notes: {notes}"
     )
-    with get_db_cursor(commit=True) as cursor:
-        cursor.execute(
+    async with get_db_cursor(commit=True) as cursor:
+        await cursor.execute(
             "INSERT INTO expenses (user_id, expense_date, amount, category, notes) "
             "VALUES (%s, %s, %s, %s, %s)",
             (user_id, expense_date, amount, category, notes),
         )
 
 
-def fetch_expense_summary(user_id, start_date, end_date):
+async def fetch_expense_summary(user_id, start_date, end_date):
     logger.info(
         f"fetch_expense_summary called for user {user_id} with start: {start_date} end: {end_date}"
     )
-    with get_db_cursor() as cursor:
-        cursor.execute(
+    async with get_db_cursor() as cursor:
+        await cursor.execute(
             """
             SELECT category, SUM(amount) as total
             FROM expenses
@@ -130,15 +139,15 @@ def fetch_expense_summary(user_id, start_date, end_date):
             """,
             (user_id, start_date, end_date),
         )
-        return cursor.fetchall()
+        return await cursor.fetchall()
 
 
-def fetch_monthly_expenses(user_id):
+async def fetch_monthly_expenses(user_id):
     logger.info(f"fetch_monthly_expenses called for user {user_id}")
-    with get_db_cursor() as cursor:
-        cursor.execute(
+    async with get_db_cursor() as cursor:
+        await cursor.execute(
             """
-            SELECT DATE_FORMAT(expense_date, '%M') AS month,
+            SELECT DATE_FORMAT(expense_date, '%%M') AS month,
                    MONTH(expense_date)              AS month_num,
                    SUM(amount)                      AS total
             FROM expenses
@@ -148,7 +157,7 @@ def fetch_monthly_expenses(user_id):
             """,
             (user_id,),
         )
-        rows = cursor.fetchall()
+        rows = await cursor.fetchall()
 
     grand_total = sum(row["total"] for row in rows)
 
@@ -165,20 +174,20 @@ def fetch_monthly_expenses(user_id):
 # Budget helpers (scoped by user_id)
 # ---------------------------------------------------------------------------
 
-def fetch_budgets(user_id):
+async def fetch_budgets(user_id):
     """Return all budget limits for a specific user as {category: monthly_limit}."""
     logger.info(f"fetch_budgets called for user {user_id}")
-    with get_db_cursor() as cursor:
-        cursor.execute("SELECT category, monthly_limit FROM budgets WHERE user_id = %s", (user_id,))
-        rows = cursor.fetchall()
+    async with get_db_cursor() as cursor:
+        await cursor.execute("SELECT category, monthly_limit FROM budgets WHERE user_id = %s", (user_id,))
+        rows = await cursor.fetchall()
     return {row["category"]: row["monthly_limit"] for row in rows}
 
 
-def upsert_budget(user_id, category, monthly_limit):
+async def upsert_budget(user_id, category, monthly_limit):
     """Insert or update the budget limit for a category and user."""
     logger.info(f"upsert_budget called for user {user_id}: {category} → {monthly_limit}")
-    with get_db_cursor(commit=True) as cursor:
-        cursor.execute(
+    async with get_db_cursor(commit=True) as cursor:
+        await cursor.execute(
             """
             INSERT INTO budgets (user_id, category, monthly_limit)
             VALUES (%s, %s, %s)
@@ -188,11 +197,11 @@ def upsert_budget(user_id, category, monthly_limit):
         )
 
 
-def fetch_budget_vs_actual(user_id, year, month):
+async def fetch_budget_vs_actual(user_id, year, month):
     """Return per-category spend vs budget for a given user, year, and month."""
     logger.info(f"fetch_budget_vs_actual called for user {user_id}: {year}-{month:02d}")
-    with get_db_cursor() as cursor:
-        cursor.execute(
+    async with get_db_cursor() as cursor:
+        await cursor.execute(
             """
             SELECT b.category,
                    b.monthly_limit,
@@ -208,4 +217,4 @@ def fetch_budget_vs_actual(user_id, year, month):
             """,
             (user_id, year, month, user_id),
         )
-        return cursor.fetchall()
+        return await cursor.fetchall()
