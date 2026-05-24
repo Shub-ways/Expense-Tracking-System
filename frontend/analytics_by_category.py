@@ -2,7 +2,8 @@ import streamlit as st
 from datetime import datetime
 import requests
 import pandas as pd
-from utils import API_URL, get_auth_headers
+import plotly.express as px
+from utils import API_URL, get_auth_headers, format_currency
 
 def analytics_by_category_tab():
     col1, col2 = st.columns(2)
@@ -33,13 +34,33 @@ def analytics_by_category_tab():
         df = pd.DataFrame(data)
         df_sorted = df.sort_values(by="Percentage", ascending=False)
         
-        st.title("Expense Breakdown By Category")
-        st.bar_chart(data=df_sorted.set_index("Category")['Percentage'], width=0, height=0, use_container_width=True)
+        st.markdown("### Expense Breakdown By Category")
         
-        df_sorted["Total"] = df_sorted["Total"].map("{:.2f}".format)
-        df_sorted["Percentage"] = df_sorted["Percentage"].map("{:.2f}%".format)
+        symbol = st.session_state.get("currency", "₹")
+        fig = px.pie(
+            df_sorted,
+            names="Category",
+            values="Total",
+            hole=0.4,
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        fig.update_traces(
+            textinfo='percent+label',
+            hovertemplate=f"<b>%{{label}}</b><br>Spent: {symbol}%{{value:,.2f}}<br>Percentage: %{{percent}}"
+        )
+        fig.update_layout(
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5),
+            margin=dict(t=20, b=20, l=20, r=20),
+            height=400
+        )
+        st.plotly_chart(fig, use_container_width=True)
         
-        st.dataframe(df_sorted, use_container_width=True)
+        df_display = df_sorted.copy()
+        df_display["Total"] = df_display["Total"].apply(format_currency)
+        df_display["Percentage"] = df_display["Percentage"].map("{:.2f}%".format)
+        
+        st.dataframe(df_display, use_container_width=True)
 
         # CSV Export
         csv = df_sorted.to_csv(index=False).encode("utf-8")

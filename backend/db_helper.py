@@ -83,10 +83,26 @@ async def fetch_user_by_username(username):
     logger.info(f"fetch_user_by_username called for username: {username}")
     async with get_db_cursor() as cursor:
         await cursor.execute(
-            "SELECT id, username, password_hash FROM users WHERE username = %s",
+            "SELECT id, username, password_hash, currency FROM users WHERE username = %s",
             (username,),
         )
         return await cursor.fetchone()
+
+
+async def update_user_currency(user_id, currency):
+    """Update preferred currency for a specific user. Returns True on success, False otherwise."""
+    logger.info(f"update_user_currency called for user {user_id} -> {currency}")
+    try:
+        async with get_db_cursor(commit=True) as cursor:
+            await cursor.execute(
+                "UPDATE users SET currency = %s WHERE id = %s",
+                (currency, user_id),
+            )
+        return True
+    except Exception as e:
+        logger.error(f"Error updating currency for user {user_id}: {e}")
+        return False
+
 
 
 # ---------------------------------------------------------------------------
@@ -168,6 +184,46 @@ async def fetch_monthly_expenses(user_id):
         }
         for row in rows
     }
+
+
+async def fetch_expenses_search(
+    user_id,
+    start_date=None,
+    end_date=None,
+    category=None,
+    query=None,
+    min_amount=None,
+    max_amount=None,
+):
+    """Search and filter user expenses dynamically based on optional criteria."""
+    logger.info(f"fetch_expenses_search called for user {user_id} with filters")
+    sql = "SELECT id, expense_date, amount, category, notes FROM expenses WHERE user_id = %s"
+    params = [user_id]
+
+    if start_date:
+        sql += " AND expense_date >= %s"
+        params.append(start_date)
+    if end_date:
+        sql += " AND expense_date <= %s"
+        params.append(end_date)
+    if category:
+        sql += " AND category = %s"
+        params.append(category)
+    if query:
+        sql += " AND notes LIKE %s"
+        params.append(f"%{query}%")
+    if min_amount is not None:
+        sql += " AND amount >= %s"
+        params.append(min_amount)
+    if max_amount is not None:
+        sql += " AND amount <= %s"
+        params.append(max_amount)
+
+    sql += " ORDER BY expense_date DESC, id DESC"
+
+    async with get_db_cursor() as cursor:
+        await cursor.execute(sql, tuple(params))
+        return await cursor.fetchall()
 
 
 # ---------------------------------------------------------------------------

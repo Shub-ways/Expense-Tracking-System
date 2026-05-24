@@ -5,6 +5,8 @@ from analytics_by_category import analytics_by_category_tab
 from analytics_by_months import analytics_by_months_tab
 from add_update import add_update_tab
 from budget import budget_tab
+from search_filter import search_filter_tab
+
 
 st.set_page_config(
     page_title="Expense Tracker",
@@ -94,13 +96,50 @@ if "token" not in st.session_state:
                         st.error("Could not connect to the backend server. Please verify it is running.")
 
 else:
-    # Sidebar layout for profile information and log out button
+    # Fetch currency symbol on login
+    if "currency" not in st.session_state:
+        try:
+            resp = requests.get(f"{API_URL}/auth/currency", headers=get_auth_headers())
+            if resp.status_code == 200:
+                st.session_state["currency"] = resp.json()["currency"]
+            else:
+                st.session_state["currency"] = "₹"
+        except Exception:
+            st.session_state["currency"] = "₹"
+
+    # Sidebar layout for profile information, settings, and log out button
     with st.sidebar:
         st.markdown(f"### 👤 Logged in as: **{st.session_state['username']}**")
+        st.markdown("---")
+        
+        st.markdown("### ⚙️ Preferences")
+        curr_options = ["₹", "$", "€", "£"]
+        try:
+            curr_idx = curr_options.index(st.session_state.get("currency", "₹"))
+        except ValueError:
+            curr_idx = 0
+            
+        selected_curr = st.selectbox("Preferred Currency", curr_options, index=curr_idx)
+        if selected_curr != st.session_state.get("currency"):
+            try:
+                resp = requests.put(
+                    f"{API_URL}/auth/currency",
+                    json={"currency": selected_curr},
+                    headers=get_auth_headers()
+                )
+                if resp.status_code == 200:
+                    st.session_state["currency"] = selected_curr
+                    st.toast(f"Currency updated to {selected_curr}")
+                    st.rerun()
+            except Exception:
+                st.error("Failed to save currency preference")
+
         st.markdown("---")
         if st.button("🚪 Log Out", use_container_width=True):
             del st.session_state["token"]
             del st.session_state["username"]
+            if "currency" in st.session_state:
+                del st.session_state["currency"]
             st.rerun()
 
     st.markdown("<h1 class='main-title'>💸 Expense Tracking System</h1>", unsafe_allow_html=True)
@@ -109,11 +148,45 @@ else:
         unsafe_allow_html=True,
     )
 
-    tab1, tab2, tab3, tab4 = st.tabs([
+    # Fetch budget vs actual alerts for warning banners
+    from datetime import date
+    today = date.today()
+    try:
+        alert_resp = requests.get(
+            f"{API_URL}/budgets/vs-actual",
+            params={"year": today.year, "month": today.month},
+            headers=get_auth_headers()
+        )
+        if alert_resp.status_code == 200:
+            budget_report = alert_resp.json()
+            alerts = []
+            for category, info in budget_report.items():
+                pct = info["percentage_used"]
+                limit = info["monthly_limit"]
+                spent = info["spent"]
+                if limit > 0:
+                    symbol = st.session_state.get("currency", "₹")
+                    if spent > limit:
+                        alerts.append(f"🚨 **{category}**: Budget exceeded! Spent {symbol}{spent:,.2f} of {symbol}{limit:,.2f} ({pct:.1f}% used)")
+                    elif pct >= 80:
+                        alerts.append(f"⚠️ **{category}**: Near budget limit! Spent {symbol}{spent:,.2f} of {symbol}{limit:,.2f} ({pct:.1f}% used)")
+            
+            if alerts:
+                with st.expander("🔔 Spending Alerts", expanded=True):
+                    for alert in alerts:
+                        if "🚨" in alert:
+                            st.error(alert)
+                        else:
+                            st.warning(alert)
+    except Exception:
+        pass
+
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📝 Add / Update",
         "📊 Analytics by Category",
         "📅 Analytics by Month",
         "💰 Budget",
+        "🔍 Search & Filters",
     ])
 
     with tab1:
@@ -124,3 +197,5 @@ else:
         analytics_by_months_tab()
     with tab4:
         budget_tab()
+    with tab5:
+        search_filter_tab()

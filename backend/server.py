@@ -59,6 +59,10 @@ class UserLogin(BaseModel):
     password: str = Field(..., min_length=1)
 
 
+class UserCurrency(BaseModel):
+    currency: str = Field(..., min_length=1, max_length=10)
+
+
 # ---------------------------------------------------------------------------
 # App
 # ---------------------------------------------------------------------------
@@ -107,9 +111,52 @@ async def login_user(credentials: UserLogin):
     return {"access_token": token, "token_type": "bearer"}
 
 
+@app.get("/auth/currency", tags=["Authentication"])
+async def get_user_currency(current_user: dict = Depends(auth.get_current_user)):
+    """Retrieve the current user's preferred currency."""
+    user = await db_helper.fetch_user_by_username(current_user["username"])
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return {"currency": user.get("currency", "₹")}
+
+
+@app.put("/auth/currency", tags=["Authentication"])
+async def update_user_pref_currency(pref: UserCurrency, current_user: dict = Depends(auth.get_current_user)):
+    """Update the current user's preferred currency."""
+    success = await db_helper.update_user_currency(current_user["id"], pref.currency)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update currency preference.")
+    return {"message": "Currency preference updated successfully!"}
+
+
 # ---------------------------------------------------------------------------
 # Expense Endpoints
 # ---------------------------------------------------------------------------
+
+@app.get("/expenses/search/all", tags=["Expenses"])
+async def search_expenses(
+    start_date: date = None,
+    end_date: date = None,
+    category: str = None,
+    notes_query: str = None,
+    min_amount: float = None,
+    max_amount: float = None,
+    current_user: dict = Depends(auth.get_current_user),
+):
+    """Search and filter user expenses dynamically (authenticated)."""
+    results = await db_helper.fetch_expenses_search(
+        current_user["id"],
+        start_date,
+        end_date,
+        category,
+        notes_query,
+        min_amount,
+        max_amount,
+    )
+    if results is None:
+        raise HTTPException(status_code=500, detail="Failed to search expenses in the database.")
+    return results
+
 
 @app.get("/expenses/{expense_date}", response_model=List[Expense], tags=["Expenses"])
 async def get_expenses(expense_date: date, current_user: dict = Depends(auth.get_current_user)):

@@ -17,7 +17,8 @@ def add_update_tab():
     with st.form(key="expense_form"):
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.text("Amount")
+            symbol = st.session_state.get("currency", "₹")
+            st.text(f"Amount ({symbol})")
         with col2:
             st.text("Category")
         with col3:

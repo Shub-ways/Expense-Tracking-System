@@ -77,15 +77,17 @@ def budget_tab():
                 return
 
             # --- Progress bars ---
+            symbol = st.session_state.get("currency", "₹")
+            # --- Progress bars ---
             for cat, info in data.items():
                 pct = min(info["percentage_used"], 100)
                 color = "🔴" if info["over_budget"] else ("🟡" if pct > 75 else "🟢")
                 st.markdown(f"**{color} {cat}**")
                 if info["over_budget"]:
-                    status_text = f"OVER BUDGET by ₹{abs(info['remaining']):.2f}"
+                    status_text = f"OVER BUDGET by {symbol}{abs(info['remaining']):.2f}"
                 else:
-                    status_text = f"₹{info['remaining']:.2f} remaining"
-                status = f"₹{info['spent']:.2f} spent of ₹{info['monthly_limit']:.2f} ({status_text})"
+                    status_text = f"{symbol}{info['remaining']:.2f} remaining"
+                status = f"{symbol}{info['spent']:.2f} spent of {symbol}{info['monthly_limit']:.2f} ({status_text})"
                 st.progress(pct / 100, text=status)
 
             st.markdown("---")
@@ -95,9 +97,9 @@ def budget_tab():
                 [
                     {
                         "Category": cat,
-                        "Budget (₹)": f"{info['monthly_limit']:.2f}",
-                        "Spent (₹)": f"{info['spent']:.2f}",
-                        "Remaining (₹)": f"{info['remaining']:.2f}",
+                        f"Budget ({symbol})": f"{info['monthly_limit']:.2f}",
+                        f"Spent ({symbol})": f"{info['spent']:.2f}",
+                        f"Remaining ({symbol})": f"{info['remaining']:.2f}",
                         "% Used": f"{info['percentage_used']:.1f}%",
                         "Status": "⚠️ Over Budget" if info["over_budget"] else "✅ On Track",
                     }

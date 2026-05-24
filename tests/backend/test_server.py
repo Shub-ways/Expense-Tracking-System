@@ -239,3 +239,49 @@ class TestBudget:
     def test_budget_vs_actual_invalid_month(self):
         response = client.get("/budgets/vs-actual", params={"year": 2024, "month": 13})
         assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# New Enhancements (Currency & Search)
+# ---------------------------------------------------------------------------
+
+class TestCurrencyPreferences:
+    @patch("backend.server.db_helper.fetch_user_by_username")
+    def test_get_currency_success(self, mock_fetch):
+        mock_fetch.return_value = {"id": 1, "username": "testuser", "password_hash": "hash", "currency": "$"}
+        response = client.get("/auth/currency")
+        assert response.status_code == 200
+        assert response.json()["currency"] == "$"
+
+    @patch("backend.server.db_helper.update_user_currency")
+    def test_update_currency_success(self, mock_update):
+        mock_update.return_value = True
+        payload = {"currency": "€"}
+        response = client.put("/auth/currency", json=payload)
+        assert response.status_code == 200
+        assert response.json()["message"] == "Currency preference updated successfully!"
+        mock_update.assert_called_once_with(1, "€")
+
+
+class TestSearchExpenses:
+    @patch("backend.server.db_helper.fetch_expenses_search")
+    def test_search_expenses_success(self, mock_search):
+        mock_search.return_value = [
+            {"id": 10, "expense_date": "2024-08-15", "amount": 150.0, "category": "Food", "notes": "Pizza party"}
+        ]
+        params = {
+            "start_date": "2024-08-01",
+            "end_date": "2024-08-31",
+            "category": "Food",
+            "notes_query": "Pizza",
+            "min_amount": 100.0,
+            "max_amount": 200.0,
+        }
+        response = client.get("/expenses/search/all", params=params)
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["notes"] == "Pizza party"
+        from datetime import date
+        mock_search.assert_called_once_with(1, date(2024, 8, 1), date(2024, 8, 31), "Food", "Pizza", 100.0, 200.0)
+
