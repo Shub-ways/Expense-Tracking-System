@@ -131,8 +131,10 @@ else:
                     st.session_state["currency"] = selected_curr
                     st.toast(f"Currency updated to {selected_curr}")
                     st.rerun()
-            except Exception:
-                st.error("Failed to save currency preference")
+                else:
+                    st.error(f"Failed to save currency preference: Status {resp.status_code} - {resp.text}")
+            except Exception as e:
+                st.error(f"Failed to save currency preference: {e}")
 
         st.markdown("---")
         if st.button("🚪 Log Out", use_container_width=True):
