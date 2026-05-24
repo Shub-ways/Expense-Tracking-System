@@ -36,6 +36,15 @@ def analytics_by_category_tab():
         st.bar_chart(data=df_sorted.set_index("Category")['Percentage'], width=0, height=0, use_container_width=10)
         
         df_sorted["Total"] = df_sorted["Total"].map("{:.2f}".format)
-        df_sorted["Percentage"] = df_sorted["Percentage"].map("{:.2f}".format)
+        df_sorted["Percentage"] = df_sorted["Percentage"].map("{:.2f}%".format)
         
-        st.table(df_sorted)
+        st.dataframe(df_sorted, use_container_width=True)
+
+        # CSV Export
+        csv = df_sorted.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            "📥 Download as CSV",
+            data=csv,
+            file_name=f"expenses_{start_date}_to_{end_date}.csv",
+            mime="text/csv",
+        )

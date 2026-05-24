@@ -1,11 +1,11 @@
 import streamlit as st 
-from datetime import datetime
+from datetime import datetime, date
 import requests
 
 API_URL = "http://localhost:8000"
 
 def add_update_tab():
-    selected_date = st.date_input("Enter Date", datetime(2024, 8, 1), label_visibility="collapsed")
+    selected_date = st.date_input("Enter Date", date.today(), label_visibility="collapsed")
     response = requests.get(f"{API_URL}/expenses/{selected_date}")
     if response.status_code == 200:
         existing_expenses = response.json()
@@ -50,12 +50,11 @@ def add_update_tab():
                 'notes': notes_input
             })
                 
-        submit_button = st.form_submit_button()
+        submit_button = st.form_submit_button("💾 Save Expenses")
         if submit_button:
-            filtered_expenses = [expense for expense in expenses if expense['amount']>0]
-            
-            requests.post(f"{API_URL}/expenses/{selected_date}", json=filtered_expenses)
-            if response.status_code == 200:
-                st.success("Expenses updated successfully!")
+            filtered_expenses = [expense for expense in expenses if expense['amount'] > 0]
+            post_response = requests.post(f"{API_URL}/expenses/{selected_date}", json=filtered_expenses)
+            if post_response.status_code == 200:
+                st.success("✅ Expenses updated successfully!")
             else:
-                st.error("Failed to retrieve expenses.")
+                st.error("❌ Failed to update expenses. Please check if the backend is running.")

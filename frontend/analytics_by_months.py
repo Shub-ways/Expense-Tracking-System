@@ -33,7 +33,16 @@ def analytics_by_months_tab():
         df_display = df_sorted.copy()
         df_display["Total"] = df_display["Total"].apply(lambda x: "{:.2f}".format(x))
             
-        st.table(df_display)
+        st.dataframe(df_display, use_container_width=True)
+
+        # CSV Export
+        csv = df_display.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            "📥 Download as CSV",
+            data=csv,
+            file_name="monthly_expenses.csv",
+            mime="text/csv",
+        )
             
     except Exception as e:
         st.error("Error fetching data. Please check if backend is running.")

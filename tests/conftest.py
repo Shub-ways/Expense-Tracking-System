@@ -1,7 +1,10 @@
 import os
 import sys
 
-project_root = os.path.join(os.path.dirname(__file__),'..')
-print("PROJECT ROOT: ", project_root)
+# Add project root so `from backend.server import app` works
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
-print(sys.path)
+
+# Also add backend/ directory so server.py's bare `import db_helper` resolves
+backend_dir = os.path.join(project_root, "backend")
+sys.path.insert(0, backend_dir)
