@@ -33,11 +33,10 @@ def analytics_by_months_tab():
         df_sorted = df.sort_values(by="Month", ascending=True)
             
         symbol = st.session_state.get("currency", "₹")
-        fig = px.area(
+        fig = px.bar(
             df_sorted,
             x="Month",
             y="Total",
-            markers=True,
             color_discrete_sequence=["#3B82F6"]
         )
         fig.update_traces(
