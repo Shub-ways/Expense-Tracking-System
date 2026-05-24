@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-from utils import API_URL
+from utils import API_URL, get_auth_headers
 from analytics_by_category import analytics_by_category_tab
 from analytics_by_months import analytics_by_months_tab
 from add_update import add_update_tab
