@@ -6,12 +6,16 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend source
+# Copy source code and migration settings
 COPY backend/ ./backend/
+COPY alembic/ ./alembic/
+COPY alembic.ini .
 COPY .env* ./
-
-WORKDIR /app/backend
 
 EXPOSE 8000
 
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+# Add backend directory to path so imports work correctly
+ENV PYTHONPATH=/app/backend
+
+# Run migrations and start FastAPI server
+CMD ["sh", "-c", "alembic upgrade head && uvicorn backend.server:app --host 0.0.0.0 --port 8000"]
