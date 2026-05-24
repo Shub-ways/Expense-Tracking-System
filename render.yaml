@@ -1,0 +1,31 @@
+services:
+  # ─── FastAPI Backend ───────────────────────────────────────────────────────
+  - type: web
+    name: expense-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: alembic upgrade head && uvicorn backend.server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_HOST
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
+
+  # ─── Streamlit Frontend ────────────────────────────────────────────────────
+  - type: web
+    name: expense-frontend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run frontend/app.py --server.port $PORT
+    envVars:
+      - key: API_URL
+        fromService:
+          name: expense-backend
+          type: web
+          property: url

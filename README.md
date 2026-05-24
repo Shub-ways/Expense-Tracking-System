@@ -209,20 +209,46 @@ streamlit run frontend/app.py
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/expenses/{date}` | Fetch all expenses for a specific date |
-| `POST` | `/expenses/{date}` | Add or update expenses for a date |
-| `GET` | `/analytics` | Get spending summary for a date range |
-| `DELETE` | `/expenses/{id}` | Delete a specific expense record |
+| `POST` | `/auth/register` | Register a new user |
+| `POST` | `/auth/login` | Log in and get access token |
+| `GET` | `/expenses/{date}` | Fetch all expenses for a specific date (Auth) |
+| `POST` | `/expenses/{date}` | Add or update expenses for a date (Auth) |
+| `POST` | `/analytics/` | Get spending summary for a date range (Auth) |
+| `POST` | `/analytics/month` | Get month-by-month spend breakdown (Auth) |
+| `GET` | `/budgets/` | Fetch monthly category budgets (Auth) |
+| `POST` | `/budgets/` | Set budget limit for category (Auth) |
+| `GET` | `/budgets/vs-actual` | Compare spend vs budget for a month (Auth) |
 
 > 📖 Interactive API docs auto-generated at `http://localhost:8000/docs` (Swagger UI)
 
 <br/>
 
+## 🌐 Cloud Deployment Setup
+
+You can deploy the complete stack using **Render Blueprints**. 
+
+### 1. Set Up Database
+Since Render's free tier does not host MySQL databases, create a free MySQL instance on a provider like:
+- [Aiven](https://aiven.io/mysql)
+- [Railway](https://railway.com)
+- [Clever Cloud](https://www.clever-cloud.com)
+
+Obtain the connection credentials (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`).
+
+### 2. Deploy to Render
+1. Click **New > Blueprint** in your Render Dashboard.
+2. Link your repository.
+3. Render will prompt you for the database connection variables (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`). Fill these in.
+4. Render will automatically launch the backend and frontend services, run Alembic migrations, and wire them up using environment variables.
+
+<br/>
+
 ## 🗺️ Roadmap
 
-- [ ] User authentication (Login / Signup)
-- [ ] Export reports to CSV / PDF
-- [ ] Monthly budget limit alerts
+- [x] User authentication (Login / Signup)
+- [x] Export reports to CSV
+- [x] Monthly budget limits and alerts
+- [x] Database migrations (Alembic)
 - [ ] Recurring expense support
 - [ ] Mobile-responsive UI
 
