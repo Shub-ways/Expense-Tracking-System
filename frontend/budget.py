@@ -81,10 +81,11 @@ def budget_tab():
                 pct = min(info["percentage_used"], 100)
                 color = "🔴" if info["over_budget"] else ("🟡" if pct > 75 else "🟢")
                 st.markdown(f"**{color} {cat}**")
-                status = (
-                    f"₹{info['spent']:.2f} spent of ₹{info['monthly_limit']:.2f} "
-                    f"({'OVER BUDGET by ₹' + f\"{abs(info['remaining']):.2f}\" if info['over_budget'] else f\"₹{info['remaining']:.2f} remaining\"})"
-                )
+                if info["over_budget"]:
+                    status_text = f"OVER BUDGET by ₹{abs(info['remaining']):.2f}"
+                else:
+                    status_text = f"₹{info['remaining']:.2f} remaining"
+                status = f"₹{info['spent']:.2f} spent of ₹{info['monthly_limit']:.2f} ({status_text})"
                 st.progress(pct / 100, text=status)
 
             st.markdown("---")
