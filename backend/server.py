@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import date
-import db_helper
 from typing import List
 from pydantic import BaseModel, field_validator, Field
+import db_helper
+import auth
 
 # ---------------------------------------------------------------------------
 # Pydantic Models
@@ -48,14 +49,24 @@ class BudgetItem(BaseModel):
         return v
 
 
+class UserRegister(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=6, max_length=50)
+
+
+class UserLogin(BaseModel):
+    username: str = Field(..., min_length=1)
+    password: str = Field(..., min_length=1)
+
+
 # ---------------------------------------------------------------------------
 # App
 # ---------------------------------------------------------------------------
 
 app = FastAPI(
     title="Expense Tracker API",
-    description="REST API for managing personal expenses and budgets.",
-    version="2.0.0",
+    description="REST API for managing personal expenses and budgets with JWT Authentication.",
+    version="3.0.0",
 )
 
 app.add_middleware(
@@ -67,24 +78,58 @@ app.add_middleware(
 
 
 # ---------------------------------------------------------------------------
+# Authentication Endpoints
+# ---------------------------------------------------------------------------
+
+@app.post("/auth/register", tags=["Authentication"])
+def register_user(user: UserRegister):
+    """Register a new user account."""
+    existing = db_helper.fetch_user_by_username(user.username)
+    if existing:
+        raise HTTPException(status_code=400, detail="Username is already taken.")
+    
+    hashed = auth.hash_password(user.password)
+    success = db_helper.create_user(user.username, hashed)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to create user account.")
+    
+    return {"message": "User registered successfully!"}
+
+
+@app.post("/auth/login", tags=["Authentication"])
+def login_user(credentials: UserLogin):
+    """Log in to retrieve an access token."""
+    user = db_helper.fetch_user_by_username(credentials.username)
+    if not user or not auth.verify_password(credentials.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid username or password.")
+    
+    token = auth.create_access_token({"user_id": user["id"], "username": user["username"]})
+    return {"access_token": token, "token_type": "bearer"}
+
+
+# ---------------------------------------------------------------------------
 # Expense Endpoints
 # ---------------------------------------------------------------------------
 
 @app.get("/expenses/{expense_date}", response_model=List[Expense], tags=["Expenses"])
-def get_expenses(expense_date: date):
-    """Retrieve all expenses logged for a specific date."""
-    expenses = db_helper.fetch_expenses_for_date(expense_date)
+def get_expenses(expense_date: date, current_user: dict = Depends(auth.get_current_user)):
+    """Retrieve all expenses logged for a specific date (authenticated)."""
+    expenses = db_helper.fetch_expenses_for_date(current_user["id"], expense_date)
     if expenses is None:
         raise HTTPException(status_code=500, detail="Failed to retrieve expenses from the database.")
     return expenses
 
 
 @app.post("/expenses/{expense_date}", tags=["Expenses"])
-def add_or_update_expense(expense_date: date, expenses: List[Expense]):
-    """Replace all expenses for a given date with the provided list."""
-    db_helper.delete_expenses_for_date(expense_date)
+def add_or_update_expense(
+    expense_date: date, expenses: List[Expense], current_user: dict = Depends(auth.get_current_user)
+):
+    """Replace all expenses for a given date with the provided list (authenticated)."""
+    db_helper.delete_expenses_for_date(current_user["id"], expense_date)
     for expense in expenses:
-        db_helper.insert_expense(expense_date, expense.amount, expense.category, expense.notes)
+        db_helper.insert_expense(
+            current_user["id"], expense_date, expense.amount, expense.category, expense.notes
+        )
     return {"message": "Expenses updated successfully!"}
 
 
@@ -93,9 +138,9 @@ def add_or_update_expense(expense_date: date, expenses: List[Expense]):
 # ---------------------------------------------------------------------------
 
 @app.post("/analytics/", tags=["Analytics"])
-def get_analytics(date_range: DateRange):
-    """Get a spending breakdown by category for a given date range."""
-    data = db_helper.fetch_expense_summary(date_range.start_date, date_range.end_date)
+def get_analytics(date_range: DateRange, current_user: dict = Depends(auth.get_current_user)):
+    """Get a spending breakdown by category for a given date range (authenticated)."""
+    data = db_helper.fetch_expense_summary(current_user["id"], date_range.start_date, date_range.end_date)
     if data is None:
         raise HTTPException(status_code=500, detail="Failed to retrieve expense summary from the database.")
 
@@ -111,10 +156,10 @@ def get_analytics(date_range: DateRange):
 
 
 @app.post("/analytics/month", tags=["Analytics"])
-def get_analytics_by_month():
-    """Get a month-by-month spending summary with percentages."""
+def get_analytics_by_month(current_user: dict = Depends(auth.get_current_user)):
+    """Get a month-by-month spending summary with percentages (authenticated)."""
     try:
-        return db_helper.fetch_monthly_expenses()
+        return db_helper.fetch_monthly_expenses(current_user["id"])
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -124,31 +169,31 @@ def get_analytics_by_month():
 # ---------------------------------------------------------------------------
 
 @app.get("/budgets/", tags=["Budget"])
-def get_budgets():
-    """Retrieve all category budget limits."""
+def get_budgets(current_user: dict = Depends(auth.get_current_user)):
+    """Retrieve all category budget limits (authenticated)."""
     try:
-        return db_helper.fetch_budgets()
+        return db_helper.fetch_budgets(current_user["id"])
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/budgets/", tags=["Budget"])
-def set_budget(budget: BudgetItem):
-    """Create or update a monthly budget limit for a category."""
+def set_budget(budget: BudgetItem, current_user: dict = Depends(auth.get_current_user)):
+    """Create or update a monthly budget limit for a category (authenticated)."""
     try:
-        db_helper.upsert_budget(budget.category, budget.monthly_limit)
+        db_helper.upsert_budget(current_user["id"], budget.category, budget.monthly_limit)
         return {"message": f"Budget for '{budget.category}' set to {budget.monthly_limit}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/budgets/vs-actual", tags=["Budget"])
-def get_budget_vs_actual(year: int, month: int):
-    """Return how much was spent vs the budget limit per category for a given month."""
+def get_budget_vs_actual(year: int, month: int, current_user: dict = Depends(auth.get_current_user)):
+    """Return how much was spent vs the budget limit per category for a given month (authenticated)."""
     if not (1 <= month <= 12):
         raise HTTPException(status_code=422, detail="month must be between 1 and 12")
     try:
-        rows = db_helper.fetch_budget_vs_actual(year, month)
+        rows = db_helper.fetch_budget_vs_actual(current_user["id"], year, month)
         result = {}
         for row in rows:
             limit = float(row["monthly_limit"])

@@ -1,15 +1,13 @@
 import streamlit as st 
 from datetime import datetime, date
 import requests
-
-API_URL = "http://localhost:8000"
+from utils import API_URL, get_auth_headers
 
 def add_update_tab():
     selected_date = st.date_input("Enter Date", date.today(), label_visibility="collapsed")
-    response = requests.get(f"{API_URL}/expenses/{selected_date}")
+    response = requests.get(f"{API_URL}/expenses/{selected_date}", headers=get_auth_headers())
     if response.status_code == 200:
         existing_expenses = response.json()
-        # st.write(existing_expenses)
     else:
         st.error("Failed to retrieve expenses")
         existing_expenses = []
@@ -42,7 +40,7 @@ def add_update_tab():
             with col2:
                 category_input = st.selectbox(label="Category", options=categories, index=categories.index(category),  key=f"category_{i}", label_visibility="collapsed")
             with col3:
-                notes_input = notes_input = st.text_input(label="Notes", value=notes, key=f"notes_{i}", label_visibility="collapsed")
+                notes_input = st.text_input(label="Notes", value=notes, key=f"notes_{i}", label_visibility="collapsed")
                 
             expenses.append({
                 'amount': amount_input,
@@ -53,7 +51,7 @@ def add_update_tab():
         submit_button = st.form_submit_button("💾 Save Expenses")
         if submit_button:
             filtered_expenses = [expense for expense in expenses if expense['amount'] > 0]
-            post_response = requests.post(f"{API_URL}/expenses/{selected_date}", json=filtered_expenses)
+            post_response = requests.post(f"{API_URL}/expenses/{selected_date}", json=filtered_expenses, headers=get_auth_headers())
             if post_response.status_code == 200:
                 st.success("✅ Expenses updated successfully!")
             else:

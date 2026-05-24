@@ -8,12 +8,74 @@ Run with:  pytest tests/ -v
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
-
-# The TestClient must import the app from the installed package path.
-# Make sure PYTHONPATH includes the project root when running pytest.
 from backend.server import app
+import auth
+
+# ---------------------------------------------------------------------------
+# Setup dependency override for authentication
+# ---------------------------------------------------------------------------
+
+def override_get_current_user():
+    return {"id": 1, "username": "testuser"}
+
+# Apply the override to all endpoints in this test module
+app.dependency_overrides[auth.get_current_user] = override_get_current_user
 
 client = TestClient(app)
+
+
+# ---------------------------------------------------------------------------
+# POST /auth/register & /auth/login
+# ---------------------------------------------------------------------------
+
+class TestAuthEndpoints:
+    @patch("backend.server.db_helper.create_user")
+    @patch("backend.server.db_helper.fetch_user_by_username")
+    def test_register_user_success(self, mock_fetch, mock_create):
+        mock_fetch.return_value = None
+        mock_create.return_value = True
+
+        payload = {"username": "newuser", "password": "password123"}
+        response = client.post("/auth/register", json=payload)
+
+        assert response.status_code == 200
+        assert response.json()["message"] == "User registered successfully!"
+        mock_fetch.assert_called_once_with("newuser")
+        mock_create.assert_called_once()
+
+    @patch("backend.server.db_helper.fetch_user_by_username")
+    def test_register_user_already_exists(self, mock_fetch):
+        mock_fetch.return_value = {"id": 1, "username": "existinguser", "password_hash": "hash"}
+
+        payload = {"username": "existinguser", "password": "password123"}
+        response = client.post("/auth/register", json=payload)
+
+        assert response.status_code == 400
+        assert "taken" in response.json()["detail"].lower()
+
+    @patch("backend.server.db_helper.fetch_user_by_username")
+    @patch("auth.verify_password")
+    def test_login_user_success(self, mock_verify, mock_fetch):
+        mock_fetch.return_value = {"id": 1, "username": "testuser", "password_hash": "hashed_pass"}
+        mock_verify.return_value = True
+
+        payload = {"username": "testuser", "password": "password123"}
+        response = client.post("/auth/login", json=payload)
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "access_token" in data
+        assert data["token_type"] == "bearer"
+
+    @patch("backend.server.db_helper.fetch_user_by_username")
+    def test_login_user_not_found(self, mock_fetch):
+        mock_fetch.return_value = None
+
+        payload = {"username": "unknown", "password": "password123"}
+        response = client.post("/auth/login", json=payload)
+
+        assert response.status_code == 401
+        assert "Invalid username" in response.json()["detail"]
 
 
 # ---------------------------------------------------------------------------
@@ -30,8 +92,8 @@ class TestGetExpenses:
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
-        assert data[0]["category"] == "Food"
-        mock_fetch.assert_called_once()
+        from datetime import date
+        mock_fetch.assert_called_once_with(1, date(2024, 8, 15))
 
     @patch("backend.server.db_helper.fetch_expenses_for_date")
     def test_returns_empty_list_when_no_expenses(self, mock_fetch):
@@ -151,7 +213,7 @@ class TestBudget:
         payload = {"category": "Food", "monthly_limit": 5000.0}
         response = client.post("/budgets/", json=payload)
         assert response.status_code == 200
-        mock_upsert.assert_called_once_with("Food", 5000.0)
+        mock_upsert.assert_called_once_with(1, "Food", 5000.0)
 
     def test_set_budget_invalid_category(self):
         payload = {"category": "Luxury", "monthly_limit": 500.0}

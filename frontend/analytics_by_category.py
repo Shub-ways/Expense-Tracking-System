@@ -2,10 +2,7 @@ import streamlit as st
 from datetime import datetime
 import requests
 import pandas as pd
-
-API_URL = "http://localhost:8000"
-
-
+from utils import API_URL, get_auth_headers
 
 def analytics_by_category_tab():
     col1, col2 = st.columns(2)
@@ -20,20 +17,24 @@ def analytics_by_category_tab():
             "end_date": end_date.strftime("%Y-%m-%d")
         }
         
-        response = requests.post(f"{API_URL}/analytics/", json=payload)
-        response = response.json()
+        response = requests.post(f"{API_URL}/analytics/", json=payload, headers=get_auth_headers())
+        if response.status_code != 200:
+            st.error("Failed to load analytics data. Is the backend running?")
+            return
+            
+        response_data = response.json()
         
         data = {
-            "Category": list(response.keys()),
-            "Total": [response[category]["total"] for category in response],
-            "Percentage": [response[category]["percentage"] for category in response]
+            "Category": list(response_data.keys()),
+            "Total": [response_data[category]["total"] for category in response_data],
+            "Percentage": [response_data[category]["percentage"] for category in response_data]
         }
         
         df = pd.DataFrame(data)
         df_sorted = df.sort_values(by="Percentage", ascending=False)
         
         st.title("Expense Breakdown By Category")
-        st.bar_chart(data=df_sorted.set_index("Category")['Percentage'], width=0, height=0, use_container_width=10)
+        st.bar_chart(data=df_sorted.set_index("Category")['Percentage'], width=0, height=0, use_container_width=True)
         
         df_sorted["Total"] = df_sorted["Total"].map("{:.2f}".format)
         df_sorted["Percentage"] = df_sorted["Percentage"].map("{:.2f}%".format)

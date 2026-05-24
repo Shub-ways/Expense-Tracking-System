@@ -2,8 +2,8 @@ import streamlit as st
 from datetime import datetime, date
 import requests
 import pandas as pd
+from utils import API_URL, get_auth_headers
 
-API_URL = "http://localhost:8000"
 CATEGORIES = ["Rent", "Food", "Shopping", "Entertainment", "Other"]
 
 
@@ -34,6 +34,7 @@ def budget_tab():
                     resp = requests.post(
                         f"{API_URL}/budgets/",
                         json={"category": cat, "monthly_limit": limit},
+                        headers=get_auth_headers(),
                     )
                     if resp.status_code == 200:
                         saved += 1
@@ -64,6 +65,7 @@ def budget_tab():
             resp = requests.get(
                 f"{API_URL}/budgets/vs-actual",
                 params={"year": sel_year, "month": sel_month},
+                headers=get_auth_headers(),
             )
             if resp.status_code != 200:
                 st.error("Failed to load budget data. Is the backend running?")

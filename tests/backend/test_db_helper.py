@@ -10,6 +10,7 @@ required. These tests verify that:
 import pytest
 from unittest.mock import patch, MagicMock, call
 from backend import db_helper
+import mysql.connector
 
 
 # ---------------------------------------------------------------------------
@@ -32,6 +33,55 @@ def make_mock_connection(cursor):
 
 
 # ---------------------------------------------------------------------------
+# User operations
+# ---------------------------------------------------------------------------
+
+class TestUserHelpers:
+    @patch("backend.db_helper._get_pool")
+    def test_create_user_success(self, mock_get_pool):
+        cursor = make_mock_cursor()
+        conn = make_mock_connection(cursor)
+        mock_get_pool.return_value.get_connection.return_value = conn
+
+        result = db_helper.create_user("testuser", "hashed_pass")
+
+        assert result is True
+        cursor.execute.assert_called_once()
+        sql = cursor.execute.call_args[0][0].upper()
+        assert "INSERT INTO USERS" in sql
+        params = cursor.execute.call_args[0][1]
+        assert "testuser" in params
+        assert "hashed_pass" in params
+        conn.commit.assert_called_once()
+
+    @patch("backend.db_helper._get_pool")
+    def test_create_user_duplicate_error(self, mock_get_pool):
+        cursor = MagicMock()
+        cursor.execute.side_effect = mysql.connector.Error(msg="Duplicate entry")
+        conn = make_mock_connection(cursor)
+        mock_get_pool.return_value.get_connection.return_value = conn
+
+        result = db_helper.create_user("testuser", "hashed_pass")
+
+        assert result is False
+        conn.rollback.assert_called_once()
+
+    @patch("backend.db_helper._get_pool")
+    def test_fetch_user_by_username_returns_user(self, mock_get_pool):
+        expected = {"id": 1, "username": "testuser", "password_hash": "hashed_pass"}
+        cursor = make_mock_cursor(fetchone_return=expected)
+        mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
+
+        result = db_helper.fetch_user_by_username("testuser")
+
+        assert result == expected
+        cursor.execute.assert_called_once()
+        sql = cursor.execute.call_args[0][0].upper()
+        assert "SELECT" in sql
+        assert "FROM USERS" in sql
+
+
+# ---------------------------------------------------------------------------
 # fetch_expenses_for_date
 # ---------------------------------------------------------------------------
 
@@ -42,20 +92,21 @@ class TestFetchExpensesForDate:
         cursor = make_mock_cursor(fetchall_return=expected)
         mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
 
-        result = db_helper.fetch_expenses_for_date("2024-08-15")
+        result = db_helper.fetch_expenses_for_date(1, "2024-08-15")
 
         assert result == expected
         cursor.execute.assert_called_once()
-        # Verify the date parameter was passed
         args = cursor.execute.call_args[0]
-        assert "2024-08-15" in args[1]
+        # user_id (1) and date must be passed
+        assert args[1][0] == 1
+        assert args[1][1] == "2024-08-15"
 
     @patch("backend.db_helper._get_pool")
     def test_returns_empty_list_for_unknown_date(self, mock_get_pool):
         cursor = make_mock_cursor(fetchall_return=[])
         mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
 
-        result = db_helper.fetch_expenses_for_date("9999-08-15")
+        result = db_helper.fetch_expenses_for_date(1, "9999-08-15")
 
         assert result == []
 
@@ -64,10 +115,11 @@ class TestFetchExpensesForDate:
         cursor = make_mock_cursor()
         mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
 
-        db_helper.fetch_expenses_for_date("2024-08-15")
+        db_helper.fetch_expenses_for_date(1, "2024-08-15")
 
         sql = cursor.execute.call_args[0][0].upper()
         assert "SELECT" in sql
+        assert "USER_ID" in sql
         assert "EXPENSE_DATE" in sql
 
 
@@ -82,12 +134,13 @@ class TestDeleteExpensesForDate:
         conn = make_mock_connection(cursor)
         mock_get_pool.return_value.get_connection.return_value = conn
 
-        db_helper.delete_expenses_for_date("2024-08-15")
+        db_helper.delete_expenses_for_date(1, "2024-08-15")
 
         sql = cursor.execute.call_args[0][0].upper()
         assert "DELETE" in sql
         args = cursor.execute.call_args[0][1]
-        assert "2024-08-15" in args
+        assert args[0] == 1
+        assert args[1] == "2024-08-15"
 
     @patch("backend.db_helper._get_pool")
     def test_commits_the_transaction(self, mock_get_pool):
@@ -95,7 +148,7 @@ class TestDeleteExpensesForDate:
         conn = make_mock_connection(cursor)
         mock_get_pool.return_value.get_connection.return_value = conn
 
-        db_helper.delete_expenses_for_date("2024-08-15")
+        db_helper.delete_expenses_for_date(1, "2024-08-15")
 
         conn.commit.assert_called_once()
 
@@ -111,15 +164,16 @@ class TestInsertExpense:
         conn = make_mock_connection(cursor)
         mock_get_pool.return_value.get_connection.return_value = conn
 
-        db_helper.insert_expense("2024-08-15", 150.0, "Food", "Lunch")
+        db_helper.insert_expense(1, "2024-08-15", 150.0, "Food", "Lunch")
 
         sql = cursor.execute.call_args[0][0].upper()
         assert "INSERT" in sql
         params = cursor.execute.call_args[0][1]
-        assert "2024-08-15" in params
-        assert 150.0 in params
-        assert "Food" in params
-        assert "Lunch" in params
+        assert params[0] == 1
+        assert params[1] == "2024-08-15"
+        assert params[2] == 150.0
+        assert params[3] == "Food"
+        assert params[4] == "Lunch"
 
     @patch("backend.db_helper._get_pool")
     def test_commits_after_insert(self, mock_get_pool):
@@ -127,7 +181,7 @@ class TestInsertExpense:
         conn = make_mock_connection(cursor)
         mock_get_pool.return_value.get_connection.return_value = conn
 
-        db_helper.insert_expense("2024-08-15", 50.0, "Shopping", "")
+        db_helper.insert_expense(1, "2024-08-15", 50.0, "Shopping", "")
 
         conn.commit.assert_called_once()
 
@@ -143,7 +197,7 @@ class TestFetchExpenseSummary:
         cursor = make_mock_cursor(fetchall_return=expected)
         mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
 
-        result = db_helper.fetch_expense_summary("2024-08-01", "2024-08-31")
+        result = db_helper.fetch_expense_summary(1, "2024-08-01", "2024-08-31")
 
         assert result == expected
 
@@ -152,7 +206,7 @@ class TestFetchExpenseSummary:
         cursor = make_mock_cursor(fetchall_return=[])
         mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
 
-        result = db_helper.fetch_expense_summary("2099-01-01", "2099-12-31")
+        result = db_helper.fetch_expense_summary(1, "2099-01-01", "2099-12-31")
 
         assert result == []
 
@@ -161,11 +215,12 @@ class TestFetchExpenseSummary:
         cursor = make_mock_cursor()
         mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
 
-        db_helper.fetch_expense_summary("2024-08-01", "2024-08-31")
+        db_helper.fetch_expense_summary(1, "2024-08-01", "2024-08-31")
 
         params = cursor.execute.call_args[0][1]
-        assert "2024-08-01" in params
-        assert "2024-08-31" in params
+        assert params[0] == 1
+        assert params[1] == "2024-08-01"
+        assert params[2] == "2024-08-31"
 
 
 # ---------------------------------------------------------------------------
@@ -182,7 +237,7 @@ class TestFetchMonthlyExpenses:
         cursor = make_mock_cursor(fetchall_return=rows)
         mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
 
-        result = db_helper.fetch_monthly_expenses()
+        result = db_helper.fetch_monthly_expenses(1)
 
         assert result["August"]["total"] == 1000.0
         assert result["September"]["total"] == 3000.0
@@ -194,7 +249,7 @@ class TestFetchMonthlyExpenses:
         cursor = make_mock_cursor(fetchall_return=[])
         mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
 
-        result = db_helper.fetch_monthly_expenses()
+        result = db_helper.fetch_monthly_expenses(1)
 
         assert result == {}
 
@@ -213,7 +268,7 @@ class TestBudgetHelpers:
         cursor = make_mock_cursor(fetchall_return=rows)
         mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
 
-        result = db_helper.fetch_budgets()
+        result = db_helper.fetch_budgets(1)
 
         assert result == {"Food": 3000.0, "Rent": 10000.0}
 
@@ -223,11 +278,15 @@ class TestBudgetHelpers:
         conn = make_mock_connection(cursor)
         mock_get_pool.return_value.get_connection.return_value = conn
 
-        db_helper.upsert_budget("Food", 5000.0)
+        db_helper.upsert_budget(1, "Food", 5000.0)
 
         conn.commit.assert_called_once()
         sql = cursor.execute.call_args[0][0].upper()
         assert "INSERT" in sql
+        params = cursor.execute.call_args[0][1]
+        assert params[0] == 1
+        assert params[1] == "Food"
+        assert params[2] == 5000.0
 
     @patch("backend.db_helper._get_pool")
     def test_fetch_budget_vs_actual_returns_rows(self, mock_get_pool):
@@ -235,6 +294,6 @@ class TestBudgetHelpers:
         cursor = make_mock_cursor(fetchall_return=rows)
         mock_get_pool.return_value.get_connection.return_value = make_mock_connection(cursor)
 
-        result = db_helper.fetch_budget_vs_actual(2024, 8)
+        result = db_helper.fetch_budget_vs_actual(1, 2024, 8)
 
         assert result == rows

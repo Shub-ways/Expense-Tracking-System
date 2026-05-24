@@ -1,8 +1,7 @@
 import streamlit as st 
 import requests
 import pandas as pd
-
-API_URL = "http://localhost:8000"
+from utils import API_URL, get_auth_headers
 
 def analytics_by_months_tab():
     st.title("Expense Breakdown By Months")
@@ -10,7 +9,11 @@ def analytics_by_months_tab():
     payload = {} 
         
     try:
-        response = requests.post(f"{API_URL}/analytics/month", json=payload)
+        response = requests.post(f"{API_URL}/analytics/month", json=payload, headers=get_auth_headers())
+        if response.status_code != 200:
+            st.error("Failed to load monthly analytics. Is the backend running?")
+            return
+            
         response_data = response.json()
             
         data = {
