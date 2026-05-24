@@ -22,7 +22,7 @@ db_pass = os.getenv("DB_PASSWORD", "")
 db_name = os.getenv("DB_NAME", "expense_manager")
 safe_pass = urllib.parse.quote_plus(db_pass)
 database_url = f"mysql+mysqlconnector://{db_user}:{safe_pass}@{db_host}/{db_name}"
-config.set_main_option("sqlalchemy.url", database_url)
+config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
