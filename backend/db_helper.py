@@ -27,17 +27,20 @@ _pool_lock = asyncio.Lock()
 
 
 async def get_pool():
-    """Return the shared connection pool, creating it on first call."""
     global _pool
     if _pool is None:
         async with _pool_lock:
             if _pool is None:
+                import ssl
+                # TiDB Serverless requires SSL
+                use_ssl = ssl.create_default_context() if "tidbcloud.com" in _db_config["host"] else None
                 _pool = await aiomysql.create_pool(
                     host=_db_config["host"],
                     port=_db_config["port"],
                     user=_db_config["user"],
                     password=_db_config["password"],
                     db=_db_config["db"],
+                    ssl=use_ssl,
                     minsize=1,
                     maxsize=5,
                     autocommit=False
