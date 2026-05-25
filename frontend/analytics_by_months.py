@@ -17,20 +17,17 @@ def analytics_by_months_tab():
             
         response_data = response.json()
             
-        data = {
-                "Month": list(response_data.keys()),
-                "Total": [response_data[month]["total"] for month in response_data]
-            }
-        df = pd.DataFrame(data)
-            
         month_order = [
-                "January", "February", "March", "April", "May", "June", 
-                "July", "August", "September", "October", "November", "December"
-            ]
-            
-        df["Month"] = pd.Categorical(df["Month"], categories=month_order, ordered=True)
-            
-        df_sorted = df.sort_values(by="Month", ascending=True)
+            "January", "February", "March", "April", "May", "June", 
+            "July", "August", "September", "October", "November", "December"
+        ]
+        
+        data = {
+            "Month": month_order,
+            "Total": [response_data.get(m, {}).get("total", 0) for m in month_order]
+        }
+        
+        df_sorted = pd.DataFrame(data)
             
         symbol = st.session_state.get("currency", "₹")
         fig = px.bar(

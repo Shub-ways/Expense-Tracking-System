@@ -8,6 +8,8 @@ services:
     envVars:
       - key: DB_HOST
         sync: false
+      - key: DB_PORT
+        sync: false
       - key: DB_USER
         sync: false
       - key: DB_PASSWORD
@@ -28,4 +30,4 @@ services:
         fromService:
           name: expense-backend
           type: web
-          property: url
+          property: host

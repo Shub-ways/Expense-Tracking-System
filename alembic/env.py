@@ -17,11 +17,12 @@ import urllib.parse
 
 # Dynamic DB URL configuration
 db_host = os.getenv("DB_HOST", "localhost")
+db_port = os.getenv("DB_PORT", "3306")
 db_user = os.getenv("DB_USER", "root")
 db_pass = os.getenv("DB_PASSWORD", "")
 db_name = os.getenv("DB_NAME", "expense_manager")
 safe_pass = urllib.parse.quote_plus(db_pass)
-database_url = f"mysql+mysqlconnector://{db_user}:{safe_pass}@{db_host}/{db_name}"
+database_url = f"mysql+mysqlconnector://{db_user}:{safe_pass}@{db_host}:{db_port}/{db_name}"
 config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 
 # Interpret the config file for Python logging.

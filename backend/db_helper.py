@@ -15,6 +15,7 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 _db_config = {
     "host": os.getenv("DB_HOST", "localhost"),
+    "port": int(os.getenv("DB_PORT", 3306)),
     "user": os.getenv("DB_USER", "root"),
     "password": os.getenv("DB_PASSWORD"),
     "db": os.getenv("DB_NAME", "expense_manager"),
@@ -33,6 +34,7 @@ async def get_pool():
             if _pool is None:
                 _pool = await aiomysql.create_pool(
                     host=_db_config["host"],
+                    port=_db_config["port"],
                     user=_db_config["user"],
                     password=_db_config["password"],
                     db=_db_config["db"],
