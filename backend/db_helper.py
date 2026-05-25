@@ -43,6 +43,7 @@ async def get_pool():
                     ssl=use_ssl,
                     minsize=1,
                     maxsize=5,
+                    pool_recycle=60,  # Recycle connections every 60 seconds to prevent TiDB idle drop
                     autocommit=False
                 )
     return _pool
