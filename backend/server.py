@@ -92,11 +92,15 @@ async def register_user(user: UserRegister):
     existing = await db_helper.fetch_user_by_username(user.username)
     if existing:
         raise HTTPException(status_code=400, detail="Username is already taken.")
+        
+    existing_email = await db_helper.fetch_user_by_email(user.email)
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email is already registered.")
     
     hashed = auth.hash_password(user.password)
     success = await db_helper.create_user(user.username, user.email, hashed)
     if not success:
-        raise HTTPException(status_code=500, detail="Failed to create user account.")
+        raise HTTPException(status_code=500, detail="Failed to create user account. Please try again later.")
     
     # Import locally to avoid circular dependencies if email_service imports server
     import email_service

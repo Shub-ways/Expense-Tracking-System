@@ -84,6 +84,19 @@ async def create_user(username, email, password_hash):
         return False
 
 
+async def fetch_user_by_email(email):
+    """Retrieve a user record by email."""
+    try:
+        async with get_db_cursor() as cursor:
+            await cursor.execute(
+                "SELECT id, username, email, password_hash, currency FROM users WHERE email = %s", (email,)
+            )
+            return await cursor.fetchone()
+    except Exception as e:
+        logger.error(f"Database error fetching user by email: {e}")
+        return None
+
+
 async def fetch_user_by_username(username):
     """Retrieve user details by username. Returns None if not found."""
     logger.info(f"fetch_user_by_username called for username: {username}")

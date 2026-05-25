@@ -30,9 +30,11 @@ client = TestClient(app)
 
 class TestAuthEndpoints:
     @patch("backend.server.db_helper.create_user")
+    @patch("backend.server.db_helper.fetch_user_by_email")
     @patch("backend.server.db_helper.fetch_user_by_username")
-    def test_register_user_success(self, mock_fetch, mock_create):
+    def test_register_user_success(self, mock_fetch, mock_fetch_email, mock_create):
         mock_fetch.return_value = None
+        mock_fetch_email.return_value = None
         mock_create.return_value = True
 
         payload = {"username": "newuser", "email": "newuser@example.com", "password": "password123"}
@@ -45,7 +47,7 @@ class TestAuthEndpoints:
 
     @patch("backend.server.db_helper.fetch_user_by_username")
     def test_register_user_already_exists(self, mock_fetch):
-        mock_fetch.return_value = {"id": 1, "username": "existinguser", "password_hash": "hash"}
+        mock_fetch.return_value = {"id": 1, "username": "existinguser", "email": "existing@example.com", "password_hash": "hash"}
 
         payload = {"username": "existinguser", "email": "existing@example.com", "password": "password123"}
         response = client.post("/auth/register", json=payload)
