@@ -18,4 +18,4 @@ EXPOSE 8000
 ENV PYTHONPATH=/app/backend
 
 # Run migrations and start FastAPI server
-CMD ["sh", "-c", "alembic upgrade head && uvicorn backend.server:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn backend.server:app --host 0.0.0.0 --port ${PORT:-8000}"]
