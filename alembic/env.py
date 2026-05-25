@@ -17,7 +17,7 @@ import urllib.parse
 
 # Dynamic DB URL configuration
 db_host = os.getenv("DB_HOST", "localhost")
-db_port = os.getenv("DB_PORT", "3306")
+db_port = os.getenv("DB_PORT", "3306") or "3306"
 db_user = os.getenv("DB_USER", "root")
 db_pass = os.getenv("DB_PASSWORD", "")
 db_name = os.getenv("DB_NAME", "expense_manager")
