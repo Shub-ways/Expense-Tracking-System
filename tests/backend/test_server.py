@@ -35,7 +35,7 @@ class TestAuthEndpoints:
         mock_fetch.return_value = None
         mock_create.return_value = True
 
-        payload = {"username": "newuser", "password": "password123"}
+        payload = {"username": "newuser", "email": "newuser@example.com", "password": "password123"}
         response = client.post("/auth/register", json=payload)
 
         assert response.status_code == 200
@@ -47,7 +47,7 @@ class TestAuthEndpoints:
     def test_register_user_already_exists(self, mock_fetch):
         mock_fetch.return_value = {"id": 1, "username": "existinguser", "password_hash": "hash"}
 
-        payload = {"username": "existinguser", "password": "password123"}
+        payload = {"username": "existinguser", "email": "existing@example.com", "password": "password123"}
         response = client.post("/auth/register", json=payload)
 
         assert response.status_code == 400

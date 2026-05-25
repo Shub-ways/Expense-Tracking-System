@@ -69,7 +69,7 @@ class TestUserHelpers:
         cursor = make_mock_cursor()
         conn = setup_mock_pool(mock_get_pool, cursor)
 
-        result = await db_helper.create_user("testuser", "hashed_pass")
+        result = await db_helper.create_user("testuser", "test@example.com", "hashed_pass")
 
         assert result is True
         cursor.execute.assert_called_once()
@@ -86,7 +86,7 @@ class TestUserHelpers:
         cursor.execute = AsyncMock(side_effect=mysql.connector.Error(msg="Duplicate entry"))
         conn = setup_mock_pool(mock_get_pool, cursor)
 
-        result = await db_helper.create_user("testuser", "hashed_pass")
+        result = await db_helper.create_user("testuser", "test@example.com", "hashed_pass")
 
         assert result is False
         conn.rollback.assert_called_once()
