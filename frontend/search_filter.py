@@ -22,7 +22,7 @@ def search_filter_tab():
         max_amount = st.number_input("Maximum Amount", min_value=0.0, value=100000.0, step=100.0)
         notes_query = st.text_input("Search Notes (keyword)")
 
-    if st.button("🔍 Search Expenses", use_container_width=True):
+    if st.button("🔍 Search Expenses", width="stretch"):
         params = {}
         if start_date:
             params["start_date"] = start_date.strftime("%Y-%m-%d")
@@ -59,7 +59,7 @@ def search_filter_tab():
                     df_display["Amount"] = df_display["Amount"].apply(format_currency)
                     
                     st.markdown(f"### Found {len(df)} matching expense(s)")
-                    st.dataframe(df_display, use_container_width=True)
+                    st.dataframe(df_display, width="stretch")
 
                     # Export to CSV
                     csv = df.to_csv(index=False).encode("utf-8")
@@ -68,7 +68,7 @@ def search_filter_tab():
                         data=csv,
                         file_name="expense_search_results.csv",
                         mime="text/csv",
-                        use_container_width=True
+                        width="stretch"
                     )
             else:
                 st.error("Failed to fetch search results from the backend.")

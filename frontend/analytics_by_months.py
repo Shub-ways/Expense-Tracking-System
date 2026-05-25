@@ -45,12 +45,12 @@ def analytics_by_months_tab():
             margin=dict(t=20, b=20, l=20, r=20),
             height=350
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
             
         df_display = df_sorted.copy()
         df_display["Total"] = df_display["Total"].apply(format_currency)
             
-        st.dataframe(df_display, use_container_width=True)
+        st.dataframe(df_display, width="stretch")
 
         # CSV Export
         csv = df_display.to_csv(index=False).encode("utf-8")

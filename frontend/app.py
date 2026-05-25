@@ -45,7 +45,7 @@ if "token" not in st.session_state:
         with st.form("login_form"):
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
-            login_submitted = st.form_submit_button("Log In", use_container_width=True)
+            login_submitted = st.form_submit_button("Log In", width="stretch")
 
             if login_submitted:
                 if not username or not password:
@@ -74,7 +74,7 @@ if "token" not in st.session_state:
             new_email = st.text_input("Email Address")
             new_password = st.text_input("Password", type="password")
             confirm_password = st.text_input("Confirm Password", type="password")
-            register_submitted = st.form_submit_button("Register", use_container_width=True)
+            register_submitted = st.form_submit_button("Register", width="stretch")
 
             if register_submitted:
                 if not new_username or not new_email or not new_password:
@@ -149,7 +149,7 @@ else:
             st.rerun()
 
         st.markdown("---")
-        if st.button("🚪 Log Out", use_container_width=True):
+        if st.button("🚪 Log Out", width="stretch"):
             del st.session_state["token"]
             del st.session_state["username"]
             if "currency" in st.session_state:
