@@ -71,13 +71,16 @@ if "token" not in st.session_state:
         st.subheader("Create a new account")
         with st.form("register_form"):
             new_username = st.text_input("Username")
+            new_email = st.text_input("Email Address")
             new_password = st.text_input("Password", type="password")
             confirm_password = st.text_input("Confirm Password", type="password")
             register_submitted = st.form_submit_button("Register", use_container_width=True)
 
             if register_submitted:
-                if not new_username or not new_password:
+                if not new_username or not new_email or not new_password:
                     st.error("Please fill in all fields")
+                elif "@" not in new_email:
+                    st.error("Please enter a valid email address")
                 elif new_password != confirm_password:
                     st.error("Passwords do not match")
                 elif len(new_password) < 6:
@@ -86,7 +89,7 @@ if "token" not in st.session_state:
                     try:
                         resp = requests.post(
                             f"{API_URL}/auth/register",
-                            json={"username": new_username, "password": new_password},
+                            json={"username": new_username, "email": new_email, "password": new_password},
                         )
                         if resp.status_code == 200:
                             st.success("Account created successfully! Please log in.")
@@ -137,12 +140,51 @@ else:
                 st.error(f"Failed to save currency preference: {e}")
 
         st.markdown("---")
+        
+        # Dark Mode Toggle
+        st.markdown("### 🎨 Appearance")
+        dark_mode = st.toggle("🌙 Dark Mode", value=st.session_state.get("dark_mode", False))
+        if dark_mode != st.session_state.get("dark_mode"):
+            st.session_state["dark_mode"] = dark_mode
+            st.rerun()
+
+        st.markdown("---")
         if st.button("🚪 Log Out", use_container_width=True):
             del st.session_state["token"]
             del st.session_state["username"]
             if "currency" in st.session_state:
                 del st.session_state["currency"]
             st.rerun()
+
+    # Apply Dark Mode CSS if enabled
+    if st.session_state.get("dark_mode", False):
+        st.markdown(
+            """
+            <style>
+            [data-testid="stAppViewContainer"] {
+                background-color: #0F172A;
+                color: #F8FAFC;
+            }
+            [data-testid="stSidebar"] {
+                background-color: #1E293B !important;
+            }
+            .main-title, .main-subtitle {
+                color: #F8FAFC !important;
+            }
+            .stMarkdown p {
+                color: #F8FAFC;
+            }
+            /* Override for tabs and select boxes in dark mode */
+            .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+                color: #94A3B8;
+            }
+            .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] p {
+                color: #F8FAFC;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
 
     st.markdown("<h1 class='main-title'>💸 Expense Tracking System</h1>", unsafe_allow_html=True)
     st.markdown(

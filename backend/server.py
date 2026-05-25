@@ -51,6 +51,7 @@ class BudgetItem(BaseModel):
 
 class UserRegister(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
+    email: str = Field(..., min_length=5, max_length=120)
     password: str = Field(..., min_length=6, max_length=50)
 
 
@@ -93,9 +94,13 @@ async def register_user(user: UserRegister):
         raise HTTPException(status_code=400, detail="Username is already taken.")
     
     hashed = auth.hash_password(user.password)
-    success = await db_helper.create_user(user.username, hashed)
+    success = await db_helper.create_user(user.username, user.email, hashed)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to create user account.")
+    
+    # Import locally to avoid circular dependencies if email_service imports server
+    import email_service
+    await email_service.send_welcome_email(user.email, user.username)
     
     return {"message": "User registered successfully!"}
 
@@ -177,6 +182,29 @@ async def add_or_update_expense(
         await db_helper.insert_expense(
             current_user["id"], expense_date, expense.amount, expense.category, expense.notes
         )
+        
+    # Check if budget is exceeded for the month of this expense date
+    user_info = await db_helper.fetch_user_by_username(current_user["username"])
+    if user_info and user_info.get("email"):
+        budget_vs_actual = await db_helper.fetch_budget_vs_actual(current_user["id"], expense_date.year, expense_date.month)
+        import email_service
+        for row in budget_vs_actual:
+            limit = float(row["monthly_limit"])
+            spent = float(row["spent"])
+            # If the user exceeded the limit, trigger alert (in reality, track if already sent to avoid spam)
+            if limit > 0 and spent > limit:
+                # We can fire and forget the email sending so it doesn't block the request
+                import asyncio
+                asyncio.create_task(
+                    email_service.send_budget_alert(
+                        user_info["email"], 
+                        row["category"], 
+                        limit, 
+                        spent, 
+                        user_info.get("currency", "₹")
+                    )
+                )
+
     return {"message": "Expenses updated successfully!"}
 
 
