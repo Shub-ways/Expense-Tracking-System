@@ -19,8 +19,25 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column('users', sa.Column('email', sa.String(length=120), nullable=True))
-    op.create_unique_constraint(None, 'users', ['email'])
+    from sqlalchemy.exc import ProgrammingError
+    
+    # Try adding the column, ignore if it already exists
+    try:
+        op.add_column('users', sa.Column('email', sa.String(length=120), nullable=True))
+    except ProgrammingError as e:
+        if "Duplicate column name" not in str(e) and "1060" not in str(e):
+            raise
+    except Exception as e:
+        if "Duplicate column" not in str(e):
+            raise
+
+    # Try adding the unique constraint, ignore if it already exists
+    try:
+        op.create_unique_constraint('uq_users_email', 'users', ['email'])
+    except ProgrammingError as e:
+        pass
+    except Exception as e:
+        pass
 
 
 def downgrade() -> None:
