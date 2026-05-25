@@ -12,10 +12,10 @@ COPY alembic/ ./alembic/
 COPY alembic.ini .
 COPY .env* ./
 
-EXPOSE 8000
+EXPOSE 7860
 
 # Add backend directory to path so imports work correctly
 ENV PYTHONPATH=/app/backend
 
 # Run migrations and start FastAPI server
-CMD ["sh", "-c", "alembic upgrade head && uvicorn backend.server:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn backend.server:app --host 0.0.0.0 --port ${PORT:-7860}"]
