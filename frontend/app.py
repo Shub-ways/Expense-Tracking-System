@@ -64,8 +64,8 @@ if "token" not in st.session_state:
                             st.rerun()
                         else:
                             st.error(resp.json().get("detail", "Invalid credentials"))
-                    except Exception:
-                        st.error("Could not connect to the backend server. Please verify it is running.")
+                    except Exception as e:
+                        st.error(f"Could not connect to the backend server at {API_URL}. Please verify it is running. (Error: {e})")
 
     with auth_tab2:
         st.subheader("Create a new account")
@@ -92,8 +92,8 @@ if "token" not in st.session_state:
                             st.success("Account created successfully! Please log in.")
                         else:
                             st.error(resp.json().get("detail", "Failed to register"))
-                    except Exception:
-                        st.error("Could not connect to the backend server. Please verify it is running.")
+                    except Exception as e:
+                        st.error(f"Could not connect to the backend server at {API_URL}. Please verify it is running. (Error: {e})")
 
 else:
     # Fetch currency symbol on login
