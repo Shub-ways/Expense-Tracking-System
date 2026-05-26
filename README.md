@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&pause=1000&color=00D4A0&center=true&vCenter=true&width=600&lines=💸+Expense+Tracking+System;Track+%7C+Budget+%7C+Visualize;Full-Stack+%7C+Cloud-Native+%7C+Secure" alt="Typing SVG" />
-
 <br/>
 
 **A full-stack, cloud-hosted personal finance manager — track expenses, set budgets, and explore beautiful analytics of your spending habits.**
@@ -114,39 +112,39 @@ Switch display currency dynamically — **₹ INR · $ USD · € EUR · £ GBP*
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                  User's Browser                      │
+│                  User's Browser                     │
 └──────────────────────┬──────────────────────────────┘
                        │  HTTPS
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│           🖥️  Streamlit Frontend                     │
-│         (Streamlit Community Cloud)                  │
-│                                                      │
-│  • Renders UI & Plotly charts                        │
-│  • Manages JWT token in session state                │
-│  • Communicates via REST (requests library)          │
+│           🖥️  Streamlit Frontend                    │
+│         (Streamlit Community Cloud)                 │
+│                                                     │
+│  • Renders UI & Plotly charts                       │
+│  • Manages JWT token in session state               │
+│  • Communicates via REST (requests library)         │
 └──────────────────────┬──────────────────────────────┘
                        │  REST API + JWT Bearer Token
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│           ⚙️  FastAPI Backend                        │
-│         (Hugging Face Spaces — Docker)               │
-│                                                      │
-│  • Async route handlers (uvicorn)                    │
-│  • Pydantic validation on all inputs                 │
-│  • JWT issuance & verification (PyJWT)               │
-│  • bcrypt password hashing                           │
-│  • Alembic migrations run automatically on boot      │
+│           ⚙️  FastAPI Backend                      │
+│         (Hugging Face Spaces — Docker)              │
+│                                                     │
+│  • Async route handlers (uvicorn)                   │
+│  • Pydantic validation on all inputs                │
+│  • JWT issuance & verification (PyJWT)              │
+│  • bcrypt password hashing                          │
+│  • Alembic migrations run automatically on boot     │
 └──────────────────────┬──────────────────────────────┘
                        │  aiomysql (async)
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│           🗄️  TiDB Serverless                        │
-│         (Cloud MySQL-compatible)                     │
-│                                                      │
-│  • Stores users, expenses, categories, budgets       │
-│  • Schema managed via Alembic migrations             │
-│  • pool_recycle to prevent idle connection drops     │
+│           🗄️  TiDB Serverless                       │
+│         (Cloud MySQL-compatible)                    │
+│                                                     │
+│  • Stores users, expenses, categories, budgets      │
+│  • Schema managed via Alembic migrations            │
+│  • pool_recycle to prevent idle connection drops    │
 └─────────────────────────────────────────────────────┘
 ```
 
