@@ -1,175 +1,204 @@
-# 💸 Expense Tracking System
+<div align="center">
 
-> A full-stack, cloud-native personal finance manager — track expenses, set budgets, and visualize your spending habits with beautiful analytics.
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&pause=1000&color=00D4A0&center=true&vCenter=true&width=600&lines=💸+Expense+Tracking+System;Track+%7C+Budget+%7C+Visualize;Full-Stack+%7C+Cloud-Native+%7C+Secure" alt="Typing SVG" />
+
+<br/>
+
+**A full-stack, cloud-hosted personal finance manager — track expenses, set budgets, and explore beautiful analytics of your spending habits.**
+
+<br/>
 
 [![Frontend](https://img.shields.io/badge/Frontend-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://expense-tracking-system-xapxb6qjyvhmdtagpejtii.streamlit.app/)
 [![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://huggingface.co/spaces/Shub-ways/expense-backend)
-[![Database](https://img.shields.io/badge/Database-TiDB%20Serverless-CC0000?style=for-the-badge&logo=mysql&logoColor=white)]()
-[![Auth](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)]()
+[![Database](https://img.shields.io/badge/Database-TiDB%20Serverless-CC0000?style=for-the-badge&logo=mysql&logoColor=white)](#)
+[![Auth](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)](#)
+
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](#)
+[![Async](https://img.shields.io/badge/Async-aiomysql-00C7B7?style=flat-square)](#)
+[![Pydantic](https://img.shields.io/badge/Validated-Pydantic-E92063?style=flat-square&logo=pydantic&logoColor=white)](#)
+[![Alembic](https://img.shields.io/badge/Migrations-Alembic-6BA539?style=flat-square)](#)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](#)
+
+<br/>
+
+🌐 **[Live App →](https://expense-tracking-system-xapxb6qjyvhmdtagpejtii.streamlit.app/)**  &nbsp;&nbsp;|&nbsp;&nbsp;  ⚙️ **[Backend API →](https://huggingface.co/spaces/Shub-ways/expense-backend)**
+
+</div>
 
 ---
 
-## 🌐 Live Demo
-
-| Service  | URL |
-|----------|-----|
-| 🖥️ **Frontend** | [expense-tracking-system-xapxb6qjyvhmdtagpejtii.streamlit.app](https://expense-tracking-system-xapxb6qjyvhmdtagpejtii.streamlit.app/) |
-| ⚙️ **Backend API** | [huggingface.co/spaces/Shub-ways/expense-backend](https://huggingface.co/spaces/Shub-ways/expense-backend) |
-
----
-
-## 📖 Table of Contents
+## 📌 Table of Contents
 
 - [Overview](#-overview)
 - [Features](#-features)
 - [Architecture](#-architecture)
-- [Technology Stack](#-technology-stack)
+- [Tech Stack](#-tech-stack)
 - [Local Setup](#-local-setup)
 - [Environment Variables](#-environment-variables)
-- [API Design](#-api-design)
-- [Key Architectural Decisions](#-key-architectural-decisions)
+- [API Reference](#-api-reference)
+- [Key Design Decisions](#-key-design-decisions)
 - [Project Structure](#-project-structure)
 
 ---
 
 ## 🧭 Overview
 
-The **Expense Tracking System** is a production-grade, cloud-hosted personal finance application built with a fully decoupled frontend/backend architecture. Users can securely register, log and categorize their daily expenses, set per-category budgets, and explore rich visual analytics of their spending patterns — all from a clean, responsive web interface.
+The **Expense Tracking System** is a production-grade, cloud-hosted personal finance application built with a fully decoupled frontend/backend architecture.
 
-The application is designed for real-world use with attention to security (bcrypt + JWT), reliability (async DB connections with pool recycling), and scalability (stateless API design).
+Users can securely register, log and categorize daily expenses, set per-category budgets, and explore rich visual analytics — all from a clean, responsive web interface.
+
+> Designed with attention to **security** (bcrypt + JWT), **reliability** (async DB with pool recycling), and **scalability** (stateless API design).
 
 ---
 
 ## ✨ Features
 
+<table>
+<tr>
+<td width="50%">
+
 ### 🔐 User Authentication
-- Secure **registration and login** with JWT-based sessions.
-- Passwords are **never stored in plain text** — bcrypt hashing is applied before persisting to the database.
-- All protected API routes require a valid `Bearer` token in the `Authorization` header.
+Secure register & login with JWT-based sessions. Passwords are **never stored in plain text** — bcrypt hashing is applied before persisting to the database.
+
+</td>
+<td width="50%">
 
 ### 📊 Dashboard & Budget Alerts
-- At-a-glance **budget vs. actual spending** comparison per category.
-- Dynamic warning banners:
-  - 🟡 **Near Budget** — triggered when spending approaches the set limit.
-  - 🔴 **Budget Exceeded** — triggered when spending goes over the limit.
+Real-time budget vs. actual spending comparison. Dynamic banners for:
+- 🟡 **Near Budget** — approaching limit
+- 🔴 **Budget Exceeded** — over the limit
+
+</td>
+</tr>
+<tr>
+<td width="50%">
 
 ### 🧾 Expense Management
-- Add, edit, and delete expenses with category tags.
-- Calendar-based date selection for accurate temporal tracking.
-- Instant UI updates after every operation.
+Add, edit, and delete expenses with category tags and calendar-based date selection. Instant UI updates after every operation.
 
-### 📈 Analytics — By Category
-- Interactive **donut charts** (Plotly) breaking down spending by category.
-- Filter by any custom date range to zoom in on a period.
+</td>
+<td width="50%">
 
-### 📅 Analytics — By Month
-- **Bar charts** showing month-over-month spending trends.
-- Quickly identify high-spend months and seasonal patterns.
+### 📈 Analytics by Category
+Interactive **donut charts** (Plotly) breaking down spending by category for any custom date range.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 📅 Analytics by Month
+**Bar charts** showing month-over-month spending trends — identify high-spend months at a glance.
+
+</td>
+<td width="50%">
 
 ### 🔍 Dynamic Search & Filters
-- Powerful search tab supporting:
-  - Keyword search
-  - Category filter
-  - Date range filter
-  - Min / Max price range filter
+Query expenses by **keyword**, **category**, **date range**, and **min/max price** from a single powerful tab.
 
-### 🌍 User Preferences & Multi-Currency
-- Users can switch their **display currency** dynamically: ₹ INR, $ USD, € EUR, £ GBP.
-- Currency preference is persisted to the user's profile and reflected across the entire app instantly.
+</td>
+</tr>
+<tr>
+<td colspan="2">
+
+### 🌍 Multi-Currency Support
+Switch display currency dynamically — **₹ INR · $ USD · € EUR · £ GBP** — persisted to user profile and reflected app-wide instantly.
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌──────────────────────────────────────────────────┐
-│              User's Browser                       │
-└──────────────────────┬───────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│                  User's Browser                      │
+└──────────────────────┬──────────────────────────────┘
                        │  HTTPS
                        ▼
-┌──────────────────────────────────────────────────┐
-│         Streamlit Frontend                        │
-│    (Streamlit Community Cloud)                    │
-│                                                   │
-│  • Renders UI & charts (Plotly)                   │
-│  • Manages JWT token in session state             │
-│  • Calls FastAPI via REST (requests library)      │
-└──────────────────────┬───────────────────────────┘
-                       │  REST API (JWT Bearer)
+┌─────────────────────────────────────────────────────┐
+│           🖥️  Streamlit Frontend                     │
+│         (Streamlit Community Cloud)                  │
+│                                                      │
+│  • Renders UI & Plotly charts                        │
+│  • Manages JWT token in session state                │
+│  • Communicates via REST (requests library)          │
+└──────────────────────┬──────────────────────────────┘
+                       │  REST API + JWT Bearer Token
                        ▼
-┌──────────────────────────────────────────────────┐
-│         FastAPI Backend                           │
-│    (Hugging Face Spaces — Docker/uvicorn)         │
-│                                                   │
-│  • Async route handlers                           │
-│  • Pydantic validation on all inputs              │
-│  • JWT issuance & verification (PyJWT)            │
-│  • bcrypt password hashing                        │
-│  • Alembic migrations run on boot                 │
-└──────────────────────┬───────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│           ⚙️  FastAPI Backend                        │
+│         (Hugging Face Spaces — Docker)               │
+│                                                      │
+│  • Async route handlers (uvicorn)                    │
+│  • Pydantic validation on all inputs                 │
+│  • JWT issuance & verification (PyJWT)               │
+│  • bcrypt password hashing                           │
+│  • Alembic migrations run automatically on boot      │
+└──────────────────────┬──────────────────────────────┘
                        │  aiomysql (async)
                        ▼
-┌──────────────────────────────────────────────────┐
-│         TiDB Serverless                           │
-│    (Cloud MySQL-compatible database)              │
-│                                                   │
-│  • Stores users, expenses, categories, budgets    │
-│  • Schema managed via Alembic migrations          │
-│  • Connection pool with aggressive pool_recycle   │
-└──────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│           🗄️  TiDB Serverless                        │
+│         (Cloud MySQL-compatible)                     │
+│                                                      │
+│  • Stores users, expenses, categories, budgets       │
+│  • Schema managed via Alembic migrations             │
+│  • pool_recycle to prevent idle connection drops     │
+└─────────────────────────────────────────────────────┘
 ```
 
-The architecture is **fully decoupled**: the Streamlit frontend runs on Streamlit Community Cloud and knows nothing about the database — it only speaks to the FastAPI backend. The backend, deployed on Hugging Face Spaces, handles all business logic, authentication, and data persistence.
+> The architecture is **fully decoupled** — Streamlit runs on Streamlit Community Cloud and only speaks REST to the FastAPI backend. The backend handles all business logic, auth, and data persistence.
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
 ### Frontend
 | Tool | Purpose |
 |------|---------|
-| **Streamlit** | UI framework |
-| **Plotly** | Interactive charts (donut, bar) |
-| **Pandas** | Data manipulation & aggregation |
-| **Requests** | REST API communication with backend |
+| ![Streamlit](https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white) | UI framework & deployment |
+| ![Plotly](https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white) | Interactive donut & bar charts |
+| ![Pandas](https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white) | Data manipulation & aggregation |
+| ![Requests](https://img.shields.io/badge/-Requests-2CA5E0?style=flat-square) | REST API communication |
 
 ### Backend
 | Tool | Purpose |
 |------|---------|
-| **FastAPI** (Python 3.10+) | Async REST API framework |
-| **Uvicorn** | ASGI server (port 7860 on HF Spaces) |
-| **PyJWT** | JWT token creation & verification |
-| **bcrypt** | Secure password hashing |
-| **Pydantic** | Request/response data validation |
-| **Alembic** | Database schema migrations |
-| **aiomysql** | Async MySQL database driver |
+| ![FastAPI](https://img.shields.io/badge/-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) | Async REST API framework |
+| ![Uvicorn](https://img.shields.io/badge/-Uvicorn-4051B5?style=flat-square) | ASGI server on port 7860 |
+| ![PyJWT](https://img.shields.io/badge/-PyJWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white) | JWT token issuance & verification |
+| ![bcrypt](https://img.shields.io/badge/-bcrypt-E91E63?style=flat-square) | Secure password hashing |
+| ![Pydantic](https://img.shields.io/badge/-Pydantic-E92063?style=flat-square&logo=pydantic&logoColor=white) | Request/response validation |
+| ![Alembic](https://img.shields.io/badge/-Alembic-6BA539?style=flat-square) | Database schema migrations |
+| ![aiomysql](https://img.shields.io/badge/-aiomysql-00758F?style=flat-square&logo=mysql&logoColor=white) | Async MySQL driver |
 
 ### Infrastructure
 | Tool | Purpose |
 |------|---------|
-| **Streamlit Community Cloud** | Frontend hosting |
-| **Hugging Face Spaces** | Backend hosting (Dockerfile) |
-| **TiDB Serverless** | Cloud MySQL-compatible database |
+| ![Streamlit Cloud](https://img.shields.io/badge/-Streamlit_Cloud-FF4B4B?style=flat-square&logo=streamlit&logoColor=white) | Frontend hosting |
+| ![Hugging Face](https://img.shields.io/badge/-Hugging_Face_Spaces-FFD21E?style=flat-square&logo=huggingface&logoColor=black) | Backend hosting (Dockerfile) |
+| ![TiDB](https://img.shields.io/badge/-TiDB_Serverless-CC0000?style=flat-square&logo=mysql&logoColor=white) | Cloud MySQL-compatible database |
 
 ---
 
 ## ⚙️ Local Setup
 
 ### Prerequisites
-- Python 3.10+
-- A [TiDB Serverless](https://tidbcloud.com/) account (free tier works)
+- Python `3.10+`
+- A [TiDB Serverless](https://tidbcloud.com/) account *(free tier works)*
 - Git
 
-### 1. Clone the Repository
+### Step 1 — Clone
 
 ```bash
 git clone https://github.com/your-username/expense-tracking-system.git
 cd expense-tracking-system
 ```
 
-### 2. Set Up the Environment
-
-Create a `.env` file in the project root:
+### Step 2 — Create `.env`
 
 ```env
 # TiDB Database Credentials
@@ -181,107 +210,117 @@ DB_PASSWORD=your_db_password
 SECRET_KEY=your_super_secret_key_here
 ```
 
-> ⚠️ **Never commit your `.env` file.** Ensure `.env` is listed in your `.gitignore`.
+> ⚠️ Never commit your `.env` — ensure it's in `.gitignore`.
 
-### 3. Install Dependencies
+### Step 3 — Install Dependencies
 
 ```bash
-# Backend dependencies
 pip install -r backend/requirements.txt
-
-# Frontend dependencies
 pip install -r frontend/requirements.txt
 ```
 
-### 4. Run Database Migrations
+### Step 4 — Run Migrations
 
 ```bash
 alembic upgrade head
 ```
 
-This will create all required tables in your TiDB database.
-
-### 5. Start the Backend
+### Step 5 — Start the Backend
 
 ```bash
 uvicorn backend.server:app --reload --port 8000
+# Interactive API docs → http://localhost:8000/docs
 ```
 
-The API will be live at `http://localhost:8000`. Visit `http://localhost:8000/docs` for the interactive Swagger UI.
-
-### 6. Start the Frontend
-
-In a new terminal:
+### Step 6 — Start the Frontend
 
 ```bash
 streamlit run frontend/app.py
+# Opens at → http://localhost:8501
 ```
 
-The app will open in your browser at `http://localhost:8501`.
-
-> 💡 Make sure the `API_URL` variable in your frontend config/secrets points to `http://localhost:8000` during local development.
+> 💡 Set `API_URL=http://localhost:8000` in your frontend secrets/config for local dev.
 
 ---
 
 ## 🔑 Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DB_HOST` | ✅ | TiDB Serverless host address |
-| `DB_USER` | ✅ | TiDB database username |
-| `DB_PASSWORD` | ✅ | TiDB database password |
-| `SECRET_KEY` | ✅ | Secret key for signing JWT tokens |
-| `API_URL` | ✅ (Frontend) | Base URL of the FastAPI backend |
+| Variable | Required | Where | Description |
+|----------|----------|-------|-------------|
+| `DB_HOST` | ✅ | Backend | TiDB Serverless host address |
+| `DB_USER` | ✅ | Backend | TiDB database username |
+| `DB_PASSWORD` | ✅ | Backend | TiDB database password |
+| `SECRET_KEY` | ✅ | Backend | Secret for signing JWT tokens |
+| `API_URL` | ✅ | Frontend | Base URL of the FastAPI backend |
 
-For **Hugging Face Spaces**, these are added as **Repository Secrets** in the Space settings. For **Streamlit Cloud**, they are added under **App Settings → Secrets**.
+> For **Hugging Face Spaces** → add as Repository Secrets in Space settings.
+> For **Streamlit Cloud** → add under App Settings → Secrets.
 
 ---
 
-## 📡 API Design
+## 📡 API Reference
 
-The backend exposes a RESTful API. All protected routes require:
-
+All protected routes require:
 ```
 Authorization: Bearer <your_jwt_token>
 ```
 
-### Key Endpoint Groups
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/auth/register` | ❌ | Register a new user |
+| `POST` | `/auth/login` | ❌ | Login & receive JWT token |
+| `GET` | `/expenses` | ✅ | List all expenses |
+| `POST` | `/expenses` | ✅ | Create a new expense |
+| `PUT` | `/expenses/{id}` | ✅ | Update an expense |
+| `DELETE` | `/expenses/{id}` | ✅ | Delete an expense |
+| `GET` | `/budgets` | ✅ | Get category budgets |
+| `POST` | `/budgets` | ✅ | Set a category budget |
+| `GET` | `/analytics/category` | ✅ | Spending by category |
+| `GET` | `/analytics/monthly` | ✅ | Month-over-month trends |
+| `GET` | `/expenses/search` | ✅ | Search & filter expenses |
+| `PATCH` | `/users/preferences` | ✅ | Update display currency |
 
-| Group | Description |
-|-------|-------------|
-| `POST /auth/register` | Register a new user |
-| `POST /auth/login` | Login and receive a JWT token |
-| `GET/POST /expenses` | List or create expenses |
-| `PUT/DELETE /expenses/{id}` | Update or delete an expense |
-| `GET/POST /budgets` | Manage category budgets |
-| `GET /analytics/category` | Spending breakdown by category |
-| `GET /analytics/monthly` | Month-over-month spending trends |
-| `GET /expenses/search` | Search/filter expenses |
-| `PATCH /users/preferences` | Update user preferences (currency) |
-
-> 📄 Full interactive docs available at `/docs` (Swagger UI) or `/redoc` when the backend is running.
+> 📄 Full interactive docs at `/docs` (Swagger UI) when the backend is running.
 
 ---
 
-## 🧠 Key Architectural Decisions
+## 🧠 Key Design Decisions
 
-### Decoupled Frontend & Backend
-The Streamlit frontend and FastAPI backend are deployed independently on separate cloud platforms. This separation allows each layer to be scaled, updated, and maintained independently without affecting the other.
+<details>
+<summary><b>🔀 Decoupled Frontend & Backend</b></summary>
+<br>
+Streamlit and FastAPI are deployed independently on separate platforms. Each layer can be scaled, updated, and maintained without affecting the other — true separation of concerns.
+</details>
 
-### Stateless JWT Authentication
-The API is entirely stateless. JWTs are issued on login and verified on each request — no server-side session storage. This means the backend can scale horizontally without any session affinity concerns.
+<details>
+<summary><b>🔐 Stateless JWT Authentication</b></summary>
+<br>
+The API is entirely stateless. JWTs are issued on login and verified per request — no server-side session storage. This means the backend can scale horizontally with zero session affinity concerns.
+</details>
 
-### Async Throughout
-FastAPI route handlers and database queries are fully `async/await`. Combined with `aiomysql`, this ensures the backend can handle high concurrency without blocking threads on I/O.
+<details>
+<summary><b>⚡ Fully Async I/O</b></summary>
+<br>
+FastAPI route handlers and DB queries are fully <code>async/await</code>. Combined with <code>aiomysql</code>, the backend handles high concurrency without blocking threads on I/O-bound operations.
+</details>
 
-### Pydantic Validation
-All incoming request bodies are validated against strict Pydantic models before touching the database. Malformed requests are rejected early with clear error messages — no raw, unvalidated data ever reaches the SQL layer.
+<details>
+<summary><b>✅ Pydantic Validation Layer</b></summary>
+<br>
+All incoming request bodies are validated against strict Pydantic models before reaching the database. Malformed requests are rejected early with clear error messages — no raw unvalidated data ever hits SQL.
+</details>
 
-### Alembic Auto-Migration on Boot
-The Hugging Face Space Dockerfile is configured to run `alembic upgrade head` automatically on startup. This ensures the production database schema is always in sync with the codebase, with zero manual intervention needed after deployments.
+<details>
+<summary><b>🔄 Alembic Auto-Migration on Boot</b></summary>
+<br>
+The Hugging Face Spaces Dockerfile runs <code>alembic upgrade head</code> automatically on startup. The production DB schema is always in sync with the codebase — zero manual intervention needed after deploys.
+</details>
 
-### Connection Pool Recycling
-TiDB Serverless aggressively closes idle connections. The backend uses an aggressive `pool_recycle` setting on the SQLAlchemy/aiomysql pool to prevent stale connections from causing silent 500 errors on low-traffic periods.
+<details>
+<summary><b>🔁 Aggressive Connection Pool Recycling</b></summary>
+<br>
+TiDB Serverless aggressively closes idle connections. An aggressive <code>pool_recycle</code> setting on the connection pool prevents stale connections from causing silent 500 errors during low-traffic periods.
+</details>
 
 ---
 
@@ -291,11 +330,11 @@ TiDB Serverless aggressively closes idle connections. The backend uses an aggres
 expense-tracking-system/
 │
 ├── backend/
-│   ├── server.py          # FastAPI app entry point
-│   ├── models.py          # SQLAlchemy ORM models
-│   ├── schemas.py         # Pydantic request/response schemas
-│   ├── auth.py            # JWT & bcrypt utilities
-│   ├── database.py        # Async DB connection & pool setup
+│   ├── server.py           # FastAPI app entry point
+│   ├── models.py           # SQLAlchemy ORM models
+│   ├── schemas.py          # Pydantic request/response schemas
+│   ├── auth.py             # JWT & bcrypt utilities
+│   ├── database.py         # Async DB connection & pool setup
 │   └── routers/
 │       ├── expenses.py
 │       ├── budgets.py
@@ -303,14 +342,14 @@ expense-tracking-system/
 │       └── users.py
 │
 ├── frontend/
-│   └── app.py             # Streamlit app entry point
+│   └── app.py              # Streamlit app entry point
 │
 ├── alembic/
 │   ├── env.py
-│   └── versions/          # Migration scripts
+│   └── versions/           # Migration scripts
 │
 ├── alembic.ini
-├── Dockerfile             # For Hugging Face Spaces deployment
+├── Dockerfile              # For Hugging Face Spaces deployment
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -320,11 +359,11 @@ expense-tracking-system/
 
 ## 🤝 Contributing
 
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature-name`
-5. Open a Pull Request.
+1. Fork the repository
+2. Create a feature branch → `git checkout -b feature/your-feature`
+3. Commit your changes → `git commit -m 'Add some feature'`
+4. Push to the branch → `git push origin feature/your-feature`
+5. Open a Pull Request
 
 ---
 
@@ -336,6 +375,10 @@ This project is licensed under the [MIT License](LICENSE).
 
 <div align="center">
 
-Built with ❤️ using **FastAPI** · **Streamlit** · **TiDB** · **Plotly**
+**Built with ❤️ using FastAPI · Streamlit · TiDB · Plotly**
+
+<br/>
+
+[![Frontend](https://img.shields.io/badge/🚀_Live_App-Click_Here-00D4A0?style=for-the-badge)](https://expense-tracking-system-xapxb6qjyvhmdtagpejtii.streamlit.app/)
 
 </div>
