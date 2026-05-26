@@ -81,6 +81,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/", tags=["Health"])
+async def root_health_check():
+    """Health check endpoint used by Hugging Face load balancer."""
+    return {"status": "ok", "message": "Expense Tracker API is running."}
+
 
 # ---------------------------------------------------------------------------
 # Authentication Endpoints
