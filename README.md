@@ -41,6 +41,15 @@
 
 ## 🧭 Overview
 
+<img width="959" height="450" alt="Screenshot 2026-05-26 154826" src="https://github.com/user-attachments/assets/5cc68756-aa17-4d6e-ab6a-cc68826d3e68" />
+
+<img width="959" height="450" alt="Screenshot 2026-05-26 154859" src="https://github.com/user-attachments/assets/5eec7fa9-560a-49ec-9a46-22419351cd95" />
+
+<img width="959" height="449" alt="Screenshot 2026-05-26 154930" src="https://github.com/user-attachments/assets/88e5ee19-5717-4a8c-b2ac-1c3537ae8d03" />
+
+<img width="959" height="449" alt="Screenshot 2026-05-26 154945" src="https://github.com/user-attachments/assets/4f9f662a-bdb3-4786-a39a-927373d84581" />
+
+
 The **Expense Tracking System** is a production-grade, cloud-hosted personal finance application built with a fully decoupled frontend/backend architecture.
 
 Users can securely register, log and categorize daily expenses, set per-category budgets, and explore rich visual analytics — all from a clean, responsive web interface.
