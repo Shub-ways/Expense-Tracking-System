@@ -69,32 +69,19 @@ async def get_db_cursor(commit=False):
 # User operations
 # ---------------------------------------------------------------------------
 
-async def create_user(username, email, password_hash):
+async def create_user(username, password_hash):
     """Insert a new user into the users table. Returns True on success, False otherwise."""
     logger.info(f"create_user called for username: {username}")
     try:
         async with get_db_cursor(commit=True) as cursor:
             await cursor.execute(
-                "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)",
-                (username, email, password_hash),
+                "INSERT INTO users (username, password_hash) VALUES (%s, %s)",
+                (username, password_hash),
             )
         return True
     except Exception as e:
         logger.error(f"Error creating user {username}: {e}")
         return False
-
-
-async def fetch_user_by_email(email):
-    """Retrieve a user record by email."""
-    try:
-        async with get_db_cursor() as cursor:
-            await cursor.execute(
-                "SELECT id, username, email, password_hash, currency FROM users WHERE email = %s", (email,)
-            )
-            return await cursor.fetchone()
-    except Exception as e:
-        logger.error(f"Database error fetching user by email: {e}")
-        return None
 
 
 async def fetch_user_by_username(username):
